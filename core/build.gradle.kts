@@ -7,12 +7,6 @@ plugins {
     alias(libs.plugins.hilt.android)
 
 }
-
-android {
-    namespace = "com.example.core"
-    compileSdk = 36
-
-
     val localProperties = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
@@ -20,7 +14,10 @@ android {
             localProperties.load(it)
         }
     }
-    val apiKey = localProperties.getProperty("API_KEY")
+
+android {
+    namespace = "com.example.core"
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -28,7 +25,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "API_KEY", apiKey)
+        buildConfigField("String", "API_KEY", localProperties.getProperty("API_KEY"))
 
     }
 
@@ -43,11 +40,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 
     buildFeatures {

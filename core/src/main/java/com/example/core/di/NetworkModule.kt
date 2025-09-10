@@ -1,5 +1,6 @@
 package com.example.core.di
 
+import com.example.core.BuildConfig
 import com.example.core.utils.constants.AppStrings.Companion.API_KEY_KEY
 import com.example.core.utils.constants.AppStrings.Companion.BASE_URL
 import com.example.khatibalamytask.data.remote.MoviesApiService
