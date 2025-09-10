@@ -21,4 +21,9 @@ object UseCasesModule {
     fun provideSearchMoviesUseCase(repo: MoviesRepository): SearchMoviesUseCase {
         return SearchMoviesUseCase(repo)
     }
+
+//    @Provides
+//    fun provideGetMovieDetailsUseCase(repo: MoviesRepository): GetMovieDetailsUseCase {
+//        return GetMovieDetailsUseCase(repo)
+//    }
 }

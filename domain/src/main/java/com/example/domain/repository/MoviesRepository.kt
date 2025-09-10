@@ -9,5 +9,5 @@ interface MoviesRepository {
 
     fun search(query: String): Flow<ResultState<List<Movie>>>
 
-    suspend fun getMovieById(id: Int): ResultState<Movie>
+//    suspend fun getMovieById(id: Int): ResultState<Movie>
 }
