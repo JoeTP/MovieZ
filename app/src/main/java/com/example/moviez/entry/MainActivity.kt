@@ -1,4 +1,4 @@
-package com.example.moviez
+package com.example.moviez.entry
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

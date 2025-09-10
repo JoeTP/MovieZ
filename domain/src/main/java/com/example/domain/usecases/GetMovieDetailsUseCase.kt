@@ -7,10 +7,10 @@ import com.example.domain.repository.MoviesRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetMovieDetailsUseCase @Inject constructor(private val repository: MoviesRepository) :
-    UseCase<Int, ResultState<Movie>> {
-    //TODO: replace with MovieDetails
-    override suspend fun invoke(movieId: Int): ResultState<Movie> {
-        return repository.getMovieById(movieId)
-    }
-}
+//class GetMovieDetailsUseCase @Inject constructor(private val repository: MoviesRepository) :
+//    UseCase<Int, ResultState<Movie>> {
+//    TODO: replace with MovieDetails
+//    override suspend fun invoke(movieId: Int): ResultState<Movie> {
+//        return repository.getMovieById(movieId)
+//    }
+//}

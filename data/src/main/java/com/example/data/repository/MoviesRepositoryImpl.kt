@@ -13,7 +13,7 @@ class MoviesRepositoryImpl @Inject constructor(
     private val remoteDataSource: MoviesRemoteDataSource,
     private val localDataSource: MoviesLocalDataSource
 ) : MoviesRepository {
-    override fun getMovies(): Flow<ResultState<List<Movie>>> {
+    override fun getMovies(): Flow<ResultState<List<Movie>>> = flow {
         //TODO: try to get data from localDataSource, if not available => fetch from remoteDataSource
         //TODO: if remoteDataSource is successful => save data to localDataSource
         //TODO: return data from localDataSource
@@ -25,6 +25,7 @@ class MoviesRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun getMovieById(id: Int): ResultState<Movie>  {
-    }
+//    override suspend fun getMovieById(id: Int): ResultState<Movie>  {
+//
+//    }
 }
