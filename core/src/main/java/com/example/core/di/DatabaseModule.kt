@@ -17,10 +17,12 @@ import kotlin.jvm.java
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     fun provideDatabase(@ApplicationContext ctx: Context): AppDatabase =
         Room.databaseBuilder(ctx, AppDatabase::class.java, DATABASE_NAME).build()
 
-    @Provides fun provideMovieDao(db: AppDatabase): MoviesDao = db.movieDao()
+    @Provides
+    fun provideMovieDao(db: AppDatabase): MoviesDao = db.movieDao()
 
 }
