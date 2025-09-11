@@ -2,6 +2,7 @@ package com.example.moviez.navigation
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 sealed class AppRouts {
 
     @Serializable
