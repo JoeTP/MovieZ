@@ -6,8 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
-import com.example.feature_movies_list.presentation.MoviesListScreen
+import com.example.feature_movies_list.presentation.MoviesListRoute
 
 @Composable
 fun AppNavSetup(modifier: Modifier , navController: NavHostController, snackbarHostState: SnackbarHostState) {
@@ -17,7 +16,7 @@ fun AppNavSetup(modifier: Modifier , navController: NavHostController, snackbarH
     NavHost(navController = navController, startDestination = startDestination) {
 
         composable<AppRouts.MoviesList> {
-            MoviesListScreen()
+            MoviesListRoute(onMovieClick = {}, onSearchClick = {})
         }
 
 //        composable<AppRouts.MovieListSearch> {
