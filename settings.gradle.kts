@@ -21,8 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "MovieZ"
 include(":app")
-include(":domain")
-include(":data")
-include(":feature_search")
-include(":feature_movies_list")
 include(":core")
+include(":data")
+include(":domain")
+include(":feature_movies_list")
+include(":feature_search")
