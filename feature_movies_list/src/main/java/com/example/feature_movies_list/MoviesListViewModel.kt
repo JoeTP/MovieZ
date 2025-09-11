@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MoviesListViewModel @Inject constructor(
-    private val getMoviesUseCase: GetMoviesUseCase
+    private val getMoviesUseCase: GetMoviesUseCase,
 ) : ViewModel(), MovieListContract {
 
     private val _state = MutableStateFlow(MovieListContract.State())
@@ -42,11 +42,12 @@ class MoviesListViewModel @Inject constructor(
     fun intent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
 
 
-    private fun processIntents() {
+    private fun processIntents() = viewModelScope.launch {
         intents.onEach { intent ->
             when (intent) {
                 MovieListContract.Intent.Load,
-                is MovieListContract.Intent.Retry -> loadMovies()
+                is MovieListContract.Intent.Retry,
+                    -> loadMovies()
 
                 is MovieListContract.Intent.OpenDetails ->
                     _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
@@ -56,15 +57,17 @@ class MoviesListViewModel @Inject constructor(
                     // _effects.emit(MovieListContract.Effect.OpenSearch)
                 }
             }
-        }.launchIn(viewModelScope)
+        }.collect()
     }
 
     private fun loadMovies() = viewModelScope.launch {
         getMoviesUseCase(Unit)
-            .onEach { result -> _state.update {
-                Log.d("TAG", "loadMovies: $result")
-                it.reduce(result)
-            } }
+            .onEach { result ->
+                _state.update {
+                    Log.d("TAG", "loadMovies: $result")
+                    it.reduce(result)
+                }
+            }
             .catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update { it.copy(isLoading = false, error = msg) }

@@ -23,6 +23,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
+
+
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -30,15 +32,9 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val original = chain.request()
-                val originalHttpUrl = original.url
-
-                val url = originalHttpUrl.newBuilder()
-                    .addQueryParameter(API_KEY_KEY, BuildConfig.API_KEY)
-                    .build()
-
                 val requestBuilder = original.newBuilder()
-                    .url(url)
-
+//                    .addHeader(API_KEY_KEY, BuildConfig.API_KEY)
+                    .addHeader("Authorization", "Bearer ${BuildConfig.ACCESS_TOKEN}")
                 val request = requestBuilder.build()
                 chain.proceed(request)
             }

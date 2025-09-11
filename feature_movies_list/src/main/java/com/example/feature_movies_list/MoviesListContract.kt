@@ -9,7 +9,7 @@ interface MovieListContract {
         data object Load : Intent
         data class Retry(val reason: String? = null) : Intent
         data class OpenDetails(val id: Int) : Intent
-        data class Search(val query: String) : Intent  // forwards to Search feature or local filter
+        data class Search(val query: String) : Intent
     }
 
     data class State(
