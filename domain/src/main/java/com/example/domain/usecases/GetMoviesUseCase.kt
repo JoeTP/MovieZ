@@ -6,8 +6,8 @@ import com.example.domain.repository.MoviesRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetMoviesUseCase @Inject constructor(private val repository: MoviesRepository) : UseCase<Unit, Flow<ResultState<List<Movie>>>> {
-    override suspend fun invoke(params: Unit): Flow<ResultState<List<Movie>>> {
-        return repository.getMovies()
+class GetMoviesUseCase @Inject constructor(private val repository: MoviesRepository) : UseCase<Int, Flow<ResultState<List<Movie>>>> {
+    override suspend fun invoke(page: Int): Flow<ResultState<List<Movie>>> {
+        return repository.getMovies(page)
     }
 }

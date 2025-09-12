@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,8 +27,6 @@ import com.example.core.utils.common_components.EmptyView
 import com.example.core.utils.common_components.ErrorView
 import com.example.core.utils.common_components.LoadingView
 import com.example.domain.model.Movie
-import com.example.feature_movies_list.MovieListContract
-import com.example.feature_movies_list.MoviesListViewModel
 
 
 @Composable
@@ -60,7 +58,8 @@ fun MoviesListRoute(
         state = state,
         onRetry = { vm.sendIntent(MovieListContract.Intent.Retry) },
         onMovieClick = { id -> onMovieClick(id) },
-        onSearchClick = onSearchClick
+        onSearchClick = onSearchClick,
+        onLoadNextPage = { vm.loadNextPage() }
     )
 
 }
@@ -71,6 +70,7 @@ fun MoviesListRoute(
 fun MoviesListScreen(
     state: MovieListContract.State,
     onRetry: () -> Unit,
+    onLoadNextPage: () -> Unit,
     onMovieClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
 ) {
@@ -105,7 +105,9 @@ fun MoviesListScreen(
                 else ->
                     SuccessState(
                         items = state.movies,
-                        onItemClick = onMovieClick
+                        onItemClick = onMovieClick,
+                        onLoadNextPage = onLoadNextPage,
+                        isLoadingNextPage = state.isLoadingNextPage
                     )
             }
         }
@@ -116,14 +118,27 @@ fun MoviesListScreen(
 fun SuccessState(
     items: List<Movie>,
     onItemClick: (Int) -> Unit,
+    onLoadNextPage: () -> Unit,
+    isLoadingNextPage: Boolean,
 ) {
     LazyColumn {
-        items(items) { movie ->
+        itemsIndexed(items) { index, movie ->
             ListItem(
                 headlineContent = { movie.title?.let { Text(it) } },
                 supportingContent = { Text(movie.releaseYear ?: "-") },
                 modifier = Modifier.clickable { onItemClick(movie.id) }
             )
+
+            if (index == items.lastIndex && !isLoadingNextPage) {
+                LaunchedEffect(Unit) {
+                    onLoadNextPage()
+                }
+            }
+        }
+        if (isLoadingNextPage) {
+            item {
+                LoadingView()
+            }
         }
     }
 }

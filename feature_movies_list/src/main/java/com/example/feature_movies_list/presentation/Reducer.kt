@@ -1,4 +1,4 @@
-package com.example.feature_movies_list
+package com.example.feature_movies_list.presentation
 
 import com.example.core.result_states.ResultState
 import com.example.domain.model.Movie

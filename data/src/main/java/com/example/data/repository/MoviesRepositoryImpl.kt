@@ -24,31 +24,22 @@ class MoviesRepositoryImpl @Inject constructor(
     private val remoteDataSource: MoviesRemoteDataSource,
     private val localDataSource: MoviesLocalDataSource,
 ) : MoviesRepository {
-    override fun getMovies(): Flow<ResultState<List<Movie>>> = flow {
-        //TODO: try to get data from localDataSource, if not available => fetch from remoteDataSource
-        //TODO: if remoteDataSource is successful => save data to localDataSource
-        //TODO: return data from localDataSource
-        //TODO: if remoteDataSource is not successful => return from localDataSource and show error message
-        //TODO: if localDataSource is not successful => return error message
+    override fun getMovies(page: Int): Flow<ResultState<List<Movie>>> = flow {
         emit(ResultState.Loading)
-
         val localMoviesFlow = localDataSource.retrievePopularMovies()
             .map { entities -> entities.map { it.toDomain() } }
-
         val cachedMovies = localMoviesFlow.firstOrNull() ?: emptyList()
-        if (cachedMovies.isNotEmpty()) {
+        if (cachedMovies.isNotEmpty() && page == 1) {
             emit(ResultState.Success(cachedMovies))
         }
-
         try {
-            val response = remoteDataSource.fetchPopularMovies()
+            val response = remoteDataSource.fetchPopularMovies(page)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
                     val movieEntity = body.results.map { it.toEntity() }
-                    localDataSource.cacheAndUpdateMovies(movieEntity)
-                    //?To show remote data after caching
-                    emit(ResultState.Success(movieEntity.map { it.toDomain() }))
+                    if (page == 1) localDataSource.cacheAndUpdateMovies(movieEntity)
+                    emit(ResultState.Success(body.results.map { it.toDomain() }))
                 } else {
                     if (cachedMovies.isEmpty()) {
                         emit(ResultState.Error("Empty response"))
@@ -72,7 +63,7 @@ class MoviesRepositoryImpl @Inject constructor(
     }
 
 
-    override fun search(query: String): Flow<ResultState<List<Movie>>> = flow {
+    override fun search(query: String, page: Int): Flow<ResultState<List<Movie>>> = flow {
 
     }
 
