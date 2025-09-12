@@ -1,6 +1,5 @@
-package com.example.feature_movies_list
+package com.example.feature_movies_list.presentation
 
-import com.example.core.result_states.ResultState
 import com.example.domain.model.Movie
 
 
@@ -16,7 +15,8 @@ interface MovieListContract {
         val isLoading: Boolean = false,
         val movies: List<Movie> = emptyList(),
         val error: String? = null,
-        val isEmpty: Boolean = false
+        val isEmpty: Boolean = false,
+        val isLoadingNextPage: Boolean = false
     )
 
     sealed interface Effect {
@@ -25,4 +25,3 @@ interface MovieListContract {
         data class OpenSearch(val query: String) : Effect
     }
 }
-

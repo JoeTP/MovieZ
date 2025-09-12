@@ -8,11 +8,9 @@ import javax.inject.Inject
 
 class MoviesRemoteDataSourceImpl @Inject constructor(private val service: MoviesApiService) : MoviesRemoteDataSource {
 
-    override suspend fun fetchPopularMovies(): Response<MoviesResponse> = service.getPopularMovies()
+    override suspend fun fetchPopularMovies(page: Int): Response<MoviesResponse> = service.getPopularMovies(page)
 
-    override suspend fun search(query: String): Response<List<MovieDto>> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun search(query: String, page: Int): Response<MoviesResponse> = service.searchMovies(query, page)
 
     override suspend fun fetchMovie(id: Int): Response<MovieDto> {
         TODO("Not yet implemented")

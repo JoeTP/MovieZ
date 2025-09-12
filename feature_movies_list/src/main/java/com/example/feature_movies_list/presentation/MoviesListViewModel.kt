@@ -1,8 +1,9 @@
-package com.example.feature_movies_list
+package com.example.feature_movies_list.presentation
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.core.result_states.ResultState
 import com.example.domain.usecases.GetMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,6 +32,10 @@ class MoviesListViewModel @Inject constructor(
 
     private val intents = MutableSharedFlow<MovieListContract.Intent>()
 
+    private var currentPage = 1
+    private var isLoadingNextPage = false
+    private val maxPage = 500
+
     init {
         processIntents()
         sendIntent(MovieListContract.Intent.Load)
@@ -57,7 +62,7 @@ class MoviesListViewModel @Inject constructor(
     }
 
     private fun loadMovies() = viewModelScope.launch {
-        getMoviesUseCase(Unit)
+        getMoviesUseCase(currentPage)
             .onEach { result ->
                 _state.update {
                     Log.d("TAG", "loadMovies: $result")
@@ -69,5 +74,39 @@ class MoviesListViewModel @Inject constructor(
                 _state.update { it.copy(isLoading = false, error = msg) }
                 _effects.emit(MovieListContract.Effect.ShowMessage(msg))
             }.collect()
+    }
+
+    fun loadNextPage() {
+        if (isLoadingNextPage || currentPage >= maxPage) return
+        isLoadingNextPage = true
+        _state.update { it.copy(isLoadingNextPage = true) }
+        viewModelScope.launch {
+            getMoviesUseCase(currentPage + 1).onEach { result ->
+                _state.update {
+                    val newMovies = if (result is ResultState.Success) result.data else emptyList()
+                    val allMovies = it.movies + newMovies
+                    it.copy(
+                        movies = allMovies,
+                        isLoading = false,
+                        error = null,
+                        isLoadingNextPage = false
+                    )
+                }
+                currentPage++
+                isLoadingNextPage = false
+               if(currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
+            }.catch { e ->
+                val msg = e.message ?: "Unexpected error"
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = msg,
+                        isLoadingNextPage = false
+                    )
+                }
+                _effects.emit(MovieListContract.Effect.ShowMessage(msg))
+                isLoadingNextPage = false
+            }.collect()
+        }
     }
 }

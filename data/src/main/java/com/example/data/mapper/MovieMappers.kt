@@ -18,3 +18,11 @@ fun MovieEntity.toDomain() = Movie(
     releaseYear = releaseYear?.split("-")?.first(),
     posterUrl = IMAGE_URL + posterPath,
 )
+
+
+fun MovieDto.toDomain(): Movie = Movie(
+    id = id,
+    title = title,
+    releaseYear = releaseDate?.split("-")?.first(),
+    posterUrl = IMAGE_URL + posterPath,
+)
