@@ -64,6 +64,25 @@ class MoviesRepositoryImpl @Inject constructor(
 
 
     override fun search(query: String, page: Int): Flow<ResultState<List<Movie>>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = remoteDataSource.search(query, page)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    emit(ResultState.Success(body.results.map { it.toDomain() }))
+                } else {
+                    emit(ResultState.Error("Empty response"))
+                }
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown server error"
+                emit(ResultState.Error("HTTP ${response.code()}: $errorMsg"))
+            }
+        } catch (e: IOException) {
+            emit(ResultState.Error("Network error: ${e.message}", e))
+        } catch (t: Throwable) {
+            emit(ResultState.Error("Unexpected error: ${t.message}", t))
+        }
 
     }
 

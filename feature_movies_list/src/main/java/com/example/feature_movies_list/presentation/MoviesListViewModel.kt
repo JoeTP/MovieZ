@@ -101,10 +101,6 @@ class MoviesListViewModel @Inject constructor(
 
                 is MovieListContract.Intent.OpenDetails ->
                     _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
-
-                is MovieListContract.Intent.Search -> {
-                    _effects.emit(MovieListContract.Effect.OpenSearch(intent.query))
-                }
                 is MovieListContract.Intent.LoadNextPage -> loadNextPage()
             }
         }.collect()

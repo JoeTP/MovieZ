@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.core.utils.common_components.movie_details.MovieDetailsRoute
 import com.example.feature_movies_list.presentation.MoviesListRoute
+import com.example.feature_search.presentation.MoviesSearchRoute
 
 @Composable
 fun AppNavSetup(
@@ -29,7 +30,9 @@ fun AppNavSetup(
         }
 
         composable<AppRouts.MovieListSearch> {
-            MoviesSearchRoute(navController)
+            MoviesSearchRoute(navController){
+                navController.navigate(AppRouts.MovieDetails)
+            }
         }
 
         composable<AppRouts.MovieDetails> {
@@ -40,8 +43,5 @@ fun AppNavSetup(
 }
 
 
-@Composable
-fun MoviesSearchRoute(navController: NavHostController?) {
 
-}
 

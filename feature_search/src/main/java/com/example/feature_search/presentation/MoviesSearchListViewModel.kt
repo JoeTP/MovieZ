@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,83 +33,83 @@ class MoviesSearchListViewModel @Inject constructor(
 
     private val _effects = MutableSharedFlow<MoviesSearchListContract.Effect>()
     val effects: SharedFlow<MoviesSearchListContract.Effect> = _effects.asSharedFlow()
-
-    private val intents = MutableSharedFlow<MoviesSearchListContract.Intent>()
-
+    private val searchQuery = MutableStateFlow("")
     private var currentPage = 1
     private var isLoadingNextPage = false
     private val maxPage = 500
-//    private var currentQuery: String = ""
-    private val _query = MutableStateFlow("")
-    val currentQuery: StateFlow<String> = _query.asStateFlow()
 
+    private val intents = MutableSharedFlow<MoviesSearchListContract.Intent>()
 
 
     init {
         processIntents()
+        observeSearch()
     }
 
 
     fun sendIntent(intent: MoviesSearchListContract.Intent) =
         viewModelScope.launch { intents.emit(intent) }
 
-
-    private fun searchMovies(query: String) {
-
-
-
-        viewModelScope.launch {
-            currentQuery
-                .debounce(700)
-                .collect { q ->
-
-                }
-
-            val searchMoviesUseCaseParams = SearchMoviesUseCaseParams(query, currentPage)
-            searchMoviesUseCase(searchMoviesUseCaseParams).onEach { result ->
-                _state.update {
-                    it.reduce(result)
-//                val newMovies = if (result is ResultState.Success) result.data else emptyList()
-//                it.copy(
-//                    movies = newMovies,
-//                    isLoading = false,
-//                    error = null,
-//                    isLoadingNextPage = false
-//                )
-
-                }
-            }.catch { e ->
+    private fun observeSearch() = viewModelScope.launch {
+        searchQuery
+            .debounce(700L)
+            .distinctUntilChanged()
+            .flatMapLatest { query ->
+                /**
+                 * To cancel prev flows when query changes
+                 * */
+                val params = SearchMoviesUseCaseParams(query, currentPage)
+                searchMoviesUseCase(params)
+            }
+            .onEach { result ->
+                _state.update { it.reduce(result) }
+            }
+            .catch { e ->
                 val msg = e.message ?: "Unexpected error"
-                _state.update { it.copy(isLoading = false, error = msg) }
                 _effects.emit(ShowMessage(msg))
+                _state.update { it.copy(isLoading = false, error = msg) }
             }.collect()
-        }
     }
 
-
     private fun loadNextPage() {
-        if (isLoadingNextPage || currentPage >= maxPage || currentQuery.isBlank()) return
+        if (isLoadingNextPage || currentPage >= maxPage || searchQuery.value.isBlank()) return
         isLoadingNextPage = true
         _state.update { it.copy(isLoadingNextPage = true) }
         viewModelScope.launch {
-            val searchMoviesUseCaseParams = SearchMoviesUseCaseParams(currentQuery, currentPage + 1)
-            searchMoviesUseCase(searchMoviesUseCaseParams).onEach { result ->
-                _state.update {
-                    val newMovies = if (result is ResultState.Success) result.data else emptyList()
-                    val allMovies = it.movies + newMovies
-                    it.copy(
-                        movies = allMovies,
-                        isLoading = false,
-                        error = null,
-                        isLoadingNextPage = false
-                    )
+            val params = SearchMoviesUseCaseParams(searchQuery.value, currentPage + 1)
+            searchMoviesUseCase(params).onEach { result ->
+                when (result) {
+                    is ResultState.Success -> {
+                        _state.update {
+                            val newMovies = result.data
+                            val allMovies = it.movies + newMovies
+                            it.copy(
+                                movies = allMovies,
+                                isLoading = false,
+                                error = null,
+                                isLoadingNextPage = false
+                            )
+                        }
+                        currentPage++
+                        if (currentPage >= maxPage) _effects.emit(ShowMessage("Free Limit Reached"))
+                    }
+
+                    is ResultState.Loading -> {
+                        //already set isLoadingNextPage above
+                    }
+
+                    is ResultState.Error -> {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = result.message,
+                                isLoadingNextPage = false
+                            )
+                        }
+                        _effects.emit(ShowMessage(result.message))
+                    }
                 }
-                currentPage++
                 isLoadingNextPage = false
-                if (currentPage >= maxPage) _effects.emit(ShowMessage(
-                        "Free Limit Reached"
-                    )
-                )
             }.catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update {
@@ -125,22 +126,20 @@ class MoviesSearchListViewModel @Inject constructor(
     }
 
     private fun processIntents() = viewModelScope.launch {
-        intents.onEach { intent ->
+        intents.collect { intent ->
             when (intent) {
                 is MoviesSearchListContract.Intent.SearchMovies -> {
                     currentPage = 1
                     isLoadingNextPage = false
-                    currentQuery = intent.query
                     _state.update { it.copy(isLoading = true, error = null) }
-                    searchMovies(currentQuery)
+                    searchQuery.value = intent.query
                 }
 
-                is MoviesSearchListContract.Intent.OpenDetails -> _effects.emit(
-                    NavigateToDetails(intent.id)
-                )
+                is MoviesSearchListContract.Intent.OpenDetails ->
+                    _effects.emit(NavigateToDetails(intent.id))
 
                 is MoviesSearchListContract.Intent.LoadNextPage -> loadNextPage()
             }
-        }.collect()
+        }
     }
 }

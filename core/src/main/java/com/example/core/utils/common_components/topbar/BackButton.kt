@@ -12,7 +12,7 @@ import androidx.navigation.NavController
 fun BackButton(navController: NavController, modifier: Modifier = Modifier) {
     IconButton(
         modifier = modifier,
-        onClick = { navController.popBackStack() }
+        onClick = { navController.navigateUp() }
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
