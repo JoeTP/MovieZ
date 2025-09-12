@@ -9,6 +9,7 @@ import retrofit2.http.Query
 
 interface MoviesApiService {
     //docs https://developer.themoviedb.org/reference/movie-popular-list
+    //TODO: modify the queries to order the movies
     @GET("movie/popular")
     suspend fun getPopularMovies(@Query("page") page: Int = 1): Response<MoviesResponse>
 
