@@ -40,6 +40,10 @@ fun MoviesListRoute(
     val ctx = LocalContext.current
 
     LaunchedEffect(Unit) {
+        vm.sendIntent(MovieListContract.Intent.Load)
+    }
+
+    LaunchedEffect(Unit) {
         vm.effects.collect { effect ->
             when (effect) {
                 is MovieListContract.Effect.ShowMessage ->
@@ -59,7 +63,7 @@ fun MoviesListRoute(
         onRetry = { vm.sendIntent(MovieListContract.Intent.Retry) },
         onMovieClick = { id -> onMovieClick(id) },
         onSearchClick = onSearchClick,
-        onLoadNextPage = { vm.loadNextPage() }
+        onLoadNextPage = { vm.sendIntent(MovieListContract.Intent.LoadNextPage) }
     )
 
 }
