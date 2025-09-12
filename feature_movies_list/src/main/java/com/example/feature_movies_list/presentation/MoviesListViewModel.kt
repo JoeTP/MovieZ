@@ -38,28 +38,10 @@ class MoviesListViewModel @Inject constructor(
 
     init {
         processIntents()
-        sendIntent(MovieListContract.Intent.Load)
     }
 
     fun sendIntent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
 
-
-    private fun processIntents() = viewModelScope.launch {
-        intents.onEach { intent ->
-            when (intent) {
-                MovieListContract.Intent.Load,
-                is MovieListContract.Intent.Retry,
-                    -> loadMovies()
-
-                is MovieListContract.Intent.OpenDetails ->
-                    _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
-
-                is MovieListContract.Intent.Search -> {
-                    _effects.emit(MovieListContract.Effect.OpenSearch(intent.query))
-                }
-            }
-        }.collect()
-    }
 
     private fun loadMovies() = viewModelScope.launch {
         getMoviesUseCase(currentPage)
@@ -76,7 +58,7 @@ class MoviesListViewModel @Inject constructor(
             }.collect()
     }
 
-    fun loadNextPage() {
+    private fun loadNextPage() {
         if (isLoadingNextPage || currentPage >= maxPage) return
         isLoadingNextPage = true
         _state.update { it.copy(isLoadingNextPage = true) }
@@ -94,7 +76,7 @@ class MoviesListViewModel @Inject constructor(
                 }
                 currentPage++
                 isLoadingNextPage = false
-               if(currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
+                if(currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
             }.catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update {
@@ -108,5 +90,23 @@ class MoviesListViewModel @Inject constructor(
                 isLoadingNextPage = false
             }.collect()
         }
+    }
+
+    private fun processIntents() = viewModelScope.launch {
+        intents.onEach { intent ->
+            when (intent) {
+                MovieListContract.Intent.Load,
+                is MovieListContract.Intent.Retry,
+                    -> loadMovies()
+
+                is MovieListContract.Intent.OpenDetails ->
+                    _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
+
+                is MovieListContract.Intent.Search -> {
+                    _effects.emit(MovieListContract.Effect.OpenSearch(intent.query))
+                }
+                is MovieListContract.Intent.LoadNextPage -> loadNextPage()
+            }
+        }.collect()
     }
 }
