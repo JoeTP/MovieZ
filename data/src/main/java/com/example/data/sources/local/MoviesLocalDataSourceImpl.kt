@@ -12,6 +12,6 @@ class MoviesLocalDataSourceImpl @Inject constructor(private val dao: MoviesDao) 
     MoviesLocalDataSource {
 
     override suspend fun retrievePopularMovies(): Flow<List<MovieEntity>> = dao.getMovies()
-    override suspend fun updateMovies(movies: List<MovieEntity>) = dao.upsertAll(movies)
+    override suspend fun cacheAndUpdateMovies(movies: List<MovieEntity>) = dao.upsertAll(movies)
 
 }
