@@ -7,7 +7,7 @@ import com.example.domain.model.Movie
 interface MovieListContract {
     sealed interface Intent {
         data object Load : Intent
-        data class Retry(val reason: String? = null) : Intent
+        data object Retry : Intent
         data class OpenDetails(val id: Int) : Intent
         data class Search(val query: String) : Intent
     }
@@ -22,6 +22,7 @@ interface MovieListContract {
     sealed interface Effect {
         data class ShowMessage(val msg: String) : Effect
         data class NavigateToDetails(val id: Int) : Effect
+        data class OpenSearch(val query: String) : Effect
     }
 }
 

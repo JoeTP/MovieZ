@@ -3,7 +3,6 @@ package com.example.feature_movies_list
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.core.result_states.userMessage
 import com.example.domain.usecases.GetMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,8 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -36,10 +33,10 @@ class MoviesListViewModel @Inject constructor(
 
     init {
         processIntents()
-        intent(MovieListContract.Intent.Load)
+        sendIntent(MovieListContract.Intent.Load)
     }
 
-    fun intent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
+    fun sendIntent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
 
 
     private fun processIntents() = viewModelScope.launch {
@@ -53,8 +50,7 @@ class MoviesListViewModel @Inject constructor(
                     _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
 
                 is MovieListContract.Intent.Search -> {
-                    // delegate to Search feature via navigation, or local filter if you want:
-                    // _effects.emit(MovieListContract.Effect.OpenSearch)
+                    _effects.emit(MovieListContract.Effect.OpenSearch(intent.query))
                 }
             }
         }.collect()
