@@ -49,13 +49,16 @@ fun MoviesListRoute(
 
                 is MovieListContract.Effect.NavigateToDetails ->
                     onMovieClick(effect.id)
+
+                is MovieListContract.Effect.OpenSearch ->
+                    onSearchClick()
             }
         }
     }
 
     MoviesListScreen(
         state = state,
-        onRetry = { vm.intent(MovieListContract.Intent.Retry()) },
+        onRetry = { vm.sendIntent(MovieListContract.Intent.Retry) },
         onMovieClick = { id -> onMovieClick(id) },
         onSearchClick = onSearchClick
     )
@@ -66,7 +69,6 @@ fun MoviesListRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoviesListScreen(
-    modifier: Modifier = Modifier,
     state: MovieListContract.State,
     onRetry: () -> Unit,
     onMovieClick: (Int) -> Unit,
@@ -84,10 +86,10 @@ fun MoviesListScreen(
                     )
                 }
             })
-    }) { padding ->
+    }) {
         Box(
             Modifier
-                .padding(padding)
+                .padding(it)
                 .fillMaxSize()
         ) {
             when {
