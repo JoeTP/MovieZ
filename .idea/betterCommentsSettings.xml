@@ -13,8 +13,7 @@
           <option name="type" value="?" />
         </CustomTag>
         <CustomTag>
-          <option name="color" value="#474747" />
-          <option name="hasStrikethrough" value="true" />
+          <option name="color" value="#FF33FF" />
           <option name="type" value="//" />
         </CustomTag>
         <CustomTag>

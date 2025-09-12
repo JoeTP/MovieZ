@@ -18,6 +18,5 @@ fun ErrorView(message: String, onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(message, color = Color.Red)
-        Button(onClick = onRetry) { Text("Retry") }
     }
 }
