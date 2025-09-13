@@ -6,7 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.core.utils.common_components.movie.MovieDetailsRoute
+import androidx.navigation.toRoute
+import com.example.feature_movie_details.presentation.MovieDetailsRoute
 import com.example.feature_movies_list.presentation.MoviesListRoute
 import com.example.feature_search.presentation.MoviesSearchRoute
 
@@ -22,26 +23,23 @@ fun AppNavSetup(
     NavHost(navController = navController, startDestination = startDestination) {
 
         composable<AppRouts.MoviesList> {
-            MoviesListRoute(onMovieClick = {
-                navController.navigate(AppRouts.MovieDetails)
+            MoviesListRoute(onMovieClick = { id ->
+                navController.navigate(AppRouts.MovieDetails(id))
             }, onSearchClick = {
                 navController.navigate(AppRouts.MovieListSearch)
             })
         }
 
         composable<AppRouts.MovieListSearch> {
-            MoviesSearchRoute(navController){
-                navController.navigate(AppRouts.MovieDetails)
+            MoviesSearchRoute(navController) { id ->
+                navController.navigate(AppRouts.MovieDetails(id))
             }
         }
 
-        composable<AppRouts.MovieDetails> {
-            MovieDetailsRoute(navController)
+        composable<AppRouts.MovieDetails> { backStackEntry ->
+            val args = backStackEntry.toRoute<AppRouts.MovieDetails>()
+            MovieDetailsRoute(navController, args.id)
         }
 
     }
 }
-
-
-
-

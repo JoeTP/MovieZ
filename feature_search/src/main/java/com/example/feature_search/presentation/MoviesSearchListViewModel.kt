@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MoviesSearchListViewModel @Inject constructor(
     private val searchMoviesUseCase: SearchMoviesUseCase,
-) : ViewModel() {
+) : ViewModel(), MoviesSearchListContract {
 
     private val _state = MutableStateFlow(MoviesSearchListContract.State())
     val state: StateFlow<MoviesSearchListContract.State> = _state.asStateFlow()

@@ -32,7 +32,6 @@ fun DefaultTopBar(
 ) {
     TopAppBar(
         title = {
-            assert(title.isNotEmpty() )
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = title,
