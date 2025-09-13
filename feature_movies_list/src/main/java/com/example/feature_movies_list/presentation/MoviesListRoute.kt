@@ -74,7 +74,6 @@ fun MoviesListRoute(
         onMovieClick = { id -> onMovieClick(id) },
         onSearchClick = onSearchClick,
         onLoadNextPage = { vm.sendIntent(MovieListContract.Intent.LoadNextPage) },
-        currentPage = vm.currentPage
     )
 
 }
@@ -88,12 +87,11 @@ fun MoviesListScreen(
     onLoadNextPage: () -> Unit,
     onMovieClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
-    currentPage: Int,
 ) {
 
     Scaffold(topBar = {
         TopAppBar(
-            title = { Text("Popular Movies $currentPage") },
+            title = { Text("Popular Movies") },
             actions = {
                 IconButton(onClick = onSearchClick) {
                     Icon(
