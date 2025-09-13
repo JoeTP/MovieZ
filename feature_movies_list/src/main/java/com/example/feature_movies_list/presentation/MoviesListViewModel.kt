@@ -32,7 +32,7 @@ class MoviesListViewModel @Inject constructor(
 
     private val intents = MutableSharedFlow<MovieListContract.Intent>()
 
-    private var currentPage = 1
+    var currentPage = 1
     private var isLoadingNextPage = false
     private var maxPage = 500
 
@@ -49,20 +49,26 @@ class MoviesListViewModel @Inject constructor(
                 _state.update {
                     Log.d("TAG", "loadMovies: $result")
                     when (result) {
-                        is ResultState.Loading -> it.copy(isLoading = true, error = null)
+                        is ResultState.Loading -> it.copy(
+                            isLoading = true,
+                            error = null,
+                            isLoadingNextPage = false
+                        )
                         is ResultState.Success -> {
                             maxPage = result.data.totalPages
                             it.copy(
                                 isLoading = false,
                                 movies = result.data.movies,
                                 isEmpty = result.data.movies.isEmpty(),
-                                error = null
+                                error = null,
+                                isLoadingNextPage = false
                             )
                         }
 
                         is ResultState.Error -> it.copy(
                             isLoading = false,
-                            error = result.message
+                            error = result.message,
+                            isLoadingNextPage = false
                         )
                     }
 
@@ -81,20 +87,34 @@ class MoviesListViewModel @Inject constructor(
         _state.update { it.copy(isLoadingNextPage = true) }
         viewModelScope.launch {
             getMoviesUseCase(currentPage + 1).onEach { result ->
-                _state.update {
-                    val newMovies =
-                        if (result is ResultState.Success) result.data.movies else emptyList()
-                    val allMovies = it.movies + newMovies
-                    it.copy(
-                        movies = allMovies,
-                        isLoading = false,
-                        error = null,
+                when (result) {
+                    is ResultState.Loading -> {
+                        _state.update { it.copy(isLoadingNextPage = true) }
+                    }
+                    is ResultState.Success -> {
+                        val newMovies = result.data.movies
+                        _state.update { prev ->
+                            val allMovies = prev.movies + newMovies
+                            prev.copy(
+                                movies = allMovies,
+                                isLoading = false,
+                                error = null,
+                                isLoadingNextPage = false,
+                                isEmpty = allMovies.isEmpty()
+                            )
+                        }
+                        currentPage++
+                        if (currentPage >= maxPage) {
+                            _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
+                        }
                         isLoadingNextPage = false
-                    )
+                    }
+                    is ResultState.Error -> {
+                        _state.update { it.copy(isLoading = false, error = result.message, isLoadingNextPage = false) }
+                        _effects.emit(MovieListContract.Effect.ShowMessage(result.message ?: "Unexpected error"))
+                        isLoadingNextPage = false
+                    }
                 }
-                currentPage++
-                isLoadingNextPage = false
-                if (currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
             }.catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update {
@@ -113,12 +133,16 @@ class MoviesListViewModel @Inject constructor(
     private fun processIntents() = viewModelScope.launch {
         intents.onEach { intent ->
             when (intent) {
-                MovieListContract.Intent.Load,
-                is MovieListContract.Intent.Retry,
-                    -> loadMovies()
+                is MovieListContract.Intent.Retry, MovieListContract.Intent.Load
+                    -> {
+                        currentPage = 1
+                        _state.update { it.copy(movies = emptyList(), isEmpty = false, error = null) }
+                        loadMovies()
+                    }
 
-                is MovieListContract.Intent.OpenDetails ->
+                is MovieListContract.Intent.OpenDetails -> {
                     _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
+                }
 
                 is MovieListContract.Intent.LoadNextPage -> loadNextPage()
             }

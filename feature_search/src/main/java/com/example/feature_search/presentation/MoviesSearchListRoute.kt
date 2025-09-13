@@ -2,11 +2,19 @@ package com.example.feature_search.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -21,13 +29,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.core.utils.common_components.AppSearchBar
-import com.example.core.utils.common_components.EmptyView
-import com.example.core.utils.common_components.ErrorView
-import com.example.core.utils.common_components.LoadingView
+import com.example.core.utils.common_components.movie.MovieCard
+import com.example.core.utils.common_components.views.EmptyView
+import com.example.core.utils.common_components.views.ErrorView
+import com.example.core.utils.common_components.views.LoadingView
 import com.example.core.utils.common_components.topbar.BackButton
 import com.example.domain.model.Movie
 
@@ -127,12 +137,40 @@ fun SuccessState(
     isLoadingNextPage: Boolean,
 ) {
 
-    LazyColumn {
+    MovieList(
+        items = items,
+        onItemClick = onItemClick,
+        isLoadingNextPage = isLoadingNextPage,
+        onLoadNextPage = onLoadNextPage
+    )
+
+}
+
+
+@Composable
+fun MovieList(
+    items: List<Movie>,
+    onItemClick: (Int) -> Unit,
+    isLoadingNextPage: Boolean,
+    onLoadNextPage: () -> Unit,
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        verticalItemSpacing = 12.dp,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(12.dp)
+    ) {
         itemsIndexed(items) { index, movie ->
-            ListItem(
-                headlineContent = { movie.title?.let { Text(it) } },
-                supportingContent = { Text(movie.releaseYear ?: "-") },
-                modifier = Modifier.clickable { onItemClick(movie.id) }
+//            ListItem(
+//                headlineContent = {  Text(movie.title)  },
+//                supportingContent = { Text(movie.releaseYear ?: "-") },
+//                modifier = Modifier.clickable { onItemClick(movie.id) }
+//            )
+            MovieCard(
+                title = movie.title,
+                posterUrl = movie.posterUrl,
+                releaseYear = movie.releaseYear,
+                onClick = { onItemClick(movie.id) }
             )
 
             if (index == items.lastIndex && !isLoadingNextPage) {

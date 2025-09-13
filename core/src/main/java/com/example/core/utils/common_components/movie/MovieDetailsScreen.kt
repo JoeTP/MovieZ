@@ -1,6 +1,5 @@
-package com.example.core.utils.common_components.movie_details
+package com.example.core.utils.common_components.movie
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

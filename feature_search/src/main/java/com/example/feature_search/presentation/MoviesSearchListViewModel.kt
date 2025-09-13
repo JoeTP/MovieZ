@@ -65,26 +65,24 @@ class MoviesSearchListViewModel @Inject constructor(
                 when (result) {
                     is ResultState.Success -> {
                         maxPage = result.data.totalPages
-                        _state.update {
-                            it.copy(
+                        _state.update { prev ->
+                            val movies = if (currentPage <= 1) result.data.movies else prev.movies
+                            prev.copy(
                                 isLoading = false,
-                                movies = result.data.movies,
-                                isEmpty = result.data.movies.isEmpty(),
-                                error = null
+                                movies = movies,
+                                isEmpty = movies.isEmpty(),
+                                error = null,
+                                isLoadingNextPage = false
                             )
                         }
                     }
 
                     is ResultState.Loading -> {
-                        _state.update {
-                            it.copy(isLoading = true, error = null)
-                        }
+                        _state.update { it.copy(isLoading = true, error = null) }
                     }
 
                     is ResultState.Error -> {
-                        _state.update {
-                            it.copy(isLoading = false, error = result.message)
-                        }
+                        _state.update { it.copy(isLoading = false, error = result.message, isLoadingNextPage = false) }
                     }
                 }
             }
@@ -104,18 +102,21 @@ class MoviesSearchListViewModel @Inject constructor(
             searchMoviesUseCase(params).onEach { result ->
                 when (result) {
                     is ResultState.Success -> {
-                        _state.update {
+                        maxPage = result.data.totalPages
+                        _state.update { prev ->
                             val newMovies = result.data.movies
-                            val allMovies = it.movies + newMovies
-                            it.copy(
+                            val allMovies = prev.movies + newMovies
+                            prev.copy(
                                 movies = allMovies,
                                 isLoading = false,
                                 error = null,
-                                isLoadingNextPage = false
+                                isLoadingNextPage = false,
+                                isEmpty = allMovies.isEmpty()
                             )
                         }
                         currentPage++
                         if (currentPage >= maxPage) _effects.emit(ShowMessage("Free Limit Reached"))
+                        isLoadingNextPage = false
                     }
 
                     is ResultState.Loading -> {
@@ -131,9 +132,9 @@ class MoviesSearchListViewModel @Inject constructor(
                             )
                         }
                         _effects.emit(ShowMessage(result.message))
+                        isLoadingNextPage = false
                     }
                 }
-                isLoadingNextPage = false
             }.catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update {
