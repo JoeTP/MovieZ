@@ -38,6 +38,7 @@ class MoviesListViewModel @Inject constructor(
 
     init {
         processIntents()
+        viewModelScope.launch { intents.emit(MovieListContract.Intent.Load) }
     }
 
     fun sendIntent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
@@ -56,9 +57,7 @@ class MoviesListViewModel @Inject constructor(
                         )
 
                         is ResultState.Success -> {
-                            Log.i("MAX", "before: $maxPage")
                             maxPage = result.data.totalPages
-                            Log.i("MAX", "after: $maxPage")
                             it.copy(
                                 isLoading = false,
                                 movies = result.data.movies,
@@ -144,8 +143,21 @@ class MoviesListViewModel @Inject constructor(
     private fun processIntents() = viewModelScope.launch {
         intents.onEach { intent ->
             when (intent) {
-                is MovieListContract.Intent.Retry, MovieListContract.Intent.Load,
-                    -> {
+                is MovieListContract.Intent.Load -> {
+                    if (_state.value.movies.isEmpty()) {
+                        currentPage = 1
+                        _state.update {
+                            it.copy(
+                                movies = emptyList(),
+                                isEmpty = false,
+                                error = null
+                            )
+                        }
+                        loadMovies()
+                    }
+                }
+
+                is MovieListContract.Intent.Retry -> {
                     currentPage = 1
                     _state.update { it.copy(movies = emptyList(), isEmpty = false, error = null) }
                     loadMovies()

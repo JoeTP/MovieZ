@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
@@ -25,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -83,7 +85,7 @@ fun MoviesSearchScreen(
     onMovieClick: (Int) -> Unit,
 ) {
 
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
 
@@ -137,11 +139,16 @@ fun SuccessState(
     isLoadingNextPage: Boolean,
 ) {
 
+    val gridState = rememberSaveable(saver = LazyStaggeredGridState.Saver) {
+        LazyStaggeredGridState()
+    }
+
     MovieList(
         items = items,
         onItemClick = onItemClick,
         isLoadingNextPage = isLoadingNextPage,
-        onLoadNextPage = onLoadNextPage
+        onLoadNextPage = onLoadNextPage,
+        gridState = gridState
     )
 
 }
@@ -153,8 +160,10 @@ fun MovieList(
     onItemClick: (Int) -> Unit,
     isLoadingNextPage: Boolean,
     onLoadNextPage: () -> Unit,
+    gridState: LazyStaggeredGridState,
 ) {
     LazyVerticalStaggeredGrid(
+        state = gridState,
         columns = StaggeredGridCells.Fixed(2),
         verticalItemSpacing = 12.dp,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
