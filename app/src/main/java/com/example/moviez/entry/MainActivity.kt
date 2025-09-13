@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.moviez.navigation.AppNavSetup
-import com.example.moviez.ui.theme.MovieZTheme
+import com.example.core.theme.MovieZTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

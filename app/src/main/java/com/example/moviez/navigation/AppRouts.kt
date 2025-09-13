@@ -10,6 +10,6 @@ sealed class AppRouts {
     @Serializable
     object MovieListSearch : AppRouts()
     @Serializable
-    object MovieDetails : AppRouts()
+    data class MovieDetails(val id : Int) : AppRouts()
 
 }

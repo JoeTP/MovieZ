@@ -6,7 +6,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.example.core.R
 
 @Composable
 fun BackButton(navController: NavController, modifier: Modifier = Modifier) {
@@ -16,7 +18,7 @@ fun BackButton(navController: NavController, modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Back"
+            contentDescription = stringResource(R.string.back)
         )
     }
 }

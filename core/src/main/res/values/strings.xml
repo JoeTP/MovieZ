@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search">Search...</string>
+    <string name="search_icon">Search icon</string>
+    <string name="clear_search">Clear search</string>
+    <string name="back">Back</string>
+    <string name="plus_21">Plus 21</string>
+</resources>

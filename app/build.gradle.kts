@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":feature_search"))
     implementation(project(":feature_movies_list"))
+    implementation(project(":feature_movie_details"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
