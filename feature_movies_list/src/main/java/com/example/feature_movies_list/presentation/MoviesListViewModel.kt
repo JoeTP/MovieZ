@@ -48,7 +48,6 @@ class MoviesListViewModel @Inject constructor(
         getMoviesUseCase(currentPage)
             .onEach { result ->
                 _state.update {
-                    Log.d("TAG", "loadMovies: $result")
                     when (result) {
                         is ResultState.Loading -> it.copy(
                             isLoading = true,
