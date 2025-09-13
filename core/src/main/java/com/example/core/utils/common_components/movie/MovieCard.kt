@@ -61,8 +61,10 @@ fun MovieCard(
                     modifier = Modifier
                         .clip(shape = RoundedCornerShape(6.dp, 6.dp, 6.dp, 0.dp))
                         .background(color = Color.Black)
-                        .padding(4.dp),
+                        .padding( horizontal = 6.dp),
                     text = releaseYear ?: "Unknown",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
 

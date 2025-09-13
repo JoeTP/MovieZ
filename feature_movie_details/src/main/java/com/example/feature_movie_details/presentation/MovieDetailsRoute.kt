@@ -1,6 +1,5 @@
 package com.example.feature_movie_details.presentation
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,10 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,26 +19,23 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.core.R
 import com.example.core.theme.MovieZTheme
 import com.example.core.utils.common_components.NetworkImage
 import com.example.core.utils.common_components.SmartSpacer
@@ -51,6 +44,7 @@ import com.example.core.utils.common_components.topbar.DefaultTopBar
 import com.example.core.utils.common_components.views.ErrorView
 import com.example.core.utils.common_components.views.LoadingView
 import com.example.domain.model.MovieDetails
+import com.example.feature_movie_details.R
 
 @Composable
 fun MovieDetailsRoute(
@@ -108,7 +102,6 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
     val countries = movie.originCountry.joinToString(", ")
     val genres = movie.genres.joinToString(", ") { it.name }
     val tagline = movie.tagline?.split(". ")?.joinToString(" / ")
-    Log.d("TAG", "SuccessState: ${movie.spokenLanguages} === $languages")
 
     Box(modifier = modifier.fillMaxSize()) {
         // Background image
@@ -121,7 +114,7 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
                     .fillMaxWidth()
                     .height(600.dp),
                 url = movie.posterUrl,
-                contentDescription = "movie poster",
+                contentDescription = stringResource(R.string.movie_poster),
                 contentScale = ContentScale.Crop
             )
             if (movie.adult) Plus21Tag()
@@ -145,7 +138,7 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
                         Image(
                             modifier = Modifier.height(20.dp),
                             painter = painterResource(id = R.drawable.imdb),
-                            contentDescription = "imdb"
+                            contentDescription = stringResource(R.string.imdb)
                         )
                         SmartSpacer(8.dp)
                         Text(movie.voteAverage.toString())
@@ -169,25 +162,44 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
                         TouchIndicator(Modifier.align(Alignment.CenterHorizontally))
                         SmartSpacer(12.dp)
                         Text(
-                            text = "Genres: $genres",
+                            text = stringResource(
+                                R.string.genres,
+                                genres
+                            ),
                             style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         )
                         SmartSpacer(8.dp)
                         tagline?.let {
                             Text(
-                                text = "Tag line: $it",
+                                text = stringResource(
+                                    R.string.tag_line,
+                                    it
+                                ),
                                 style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal)
                             )
                         }
                         HorizontalDivider(Modifier.padding(14.dp))
                         Text(movie.overview, textAlign = TextAlign.Justify)
                         HorizontalDivider(Modifier.padding(14.dp))
-                        Text("Languages: $languages")
-                        Text("Country: $countries")
                         Text(
-                            "Released ${movie.releaseYear}",
-                            style = TextStyle(fontStyle = FontStyle.Italic)
-                        )
+                            stringResource(
+                                R.string.languages,
+                                languages
+                            ))
+                        Text(
+                            stringResource(
+                                R.string.country,
+                                countries
+                            ))
+                        movie.releaseYear?.let {
+                            Text(
+                                text = stringResource(
+                                    R.string.released,
+                                    it
+                                ),
+                                style = TextStyle(fontStyle = FontStyle.Italic)
+                            )
+                        }
                         SmartSpacer(300.dp)
                     }
                 }
@@ -202,7 +214,10 @@ fun TouchIndicator(modifier: Modifier = Modifier) {
         modifier
             .width(60.dp)
             .height(5.dp)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), shape = RoundedCornerShape(100.dp))
+            .background(
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(100.dp)
+            )
     )
 }
 
