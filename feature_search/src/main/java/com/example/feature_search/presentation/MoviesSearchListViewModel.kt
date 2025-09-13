@@ -102,7 +102,7 @@ class MoviesSearchListViewModel @Inject constructor(
             searchMoviesUseCase(params).onEach { result ->
                 when (result) {
                     is ResultState.Success -> {
-                        maxPage = result.data.totalPages
+//                        maxPage = result.data.totalPages
                         _state.update { prev ->
                             val newMovies = result.data.movies
                             val allMovies = prev.movies + newMovies
@@ -115,7 +115,7 @@ class MoviesSearchListViewModel @Inject constructor(
                             )
                         }
                         currentPage++
-                        if (currentPage >= maxPage) _effects.emit(ShowMessage("Free Limit Reached"))
+                        if (currentPage >= /*maxPage*/ 500) _effects.emit(ShowMessage("Free Limit Reached"))
                         isLoadingNextPage = false
                     }
 
