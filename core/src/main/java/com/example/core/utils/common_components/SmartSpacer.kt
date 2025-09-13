@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun SmartSpacerV(
+fun SmartSpacer(
     size: Dp,
     modifier: Modifier = Modifier
 ) {
