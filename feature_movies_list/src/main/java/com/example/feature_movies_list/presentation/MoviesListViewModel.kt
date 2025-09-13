@@ -34,7 +34,7 @@ class MoviesListViewModel @Inject constructor(
 
     private var currentPage = 1
     private var isLoadingNextPage = false
-    private val maxPage = 500
+    private var maxPage = 500
 
     init {
         processIntents()
@@ -48,7 +48,24 @@ class MoviesListViewModel @Inject constructor(
             .onEach { result ->
                 _state.update {
                     Log.d("TAG", "loadMovies: $result")
-                    it.reduce(result)
+                    when (result) {
+                        is ResultState.Loading -> it.copy(isLoading = true, error = null)
+                        is ResultState.Success -> {
+                            maxPage = result.data.totalPages
+                            it.copy(
+                                isLoading = false,
+                                movies = result.data.movies,
+                                isEmpty = result.data.movies.isEmpty(),
+                                error = null
+                            )
+                        }
+
+                        is ResultState.Error -> it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
+
                 }
             }
             .catch { e ->
@@ -65,7 +82,8 @@ class MoviesListViewModel @Inject constructor(
         viewModelScope.launch {
             getMoviesUseCase(currentPage + 1).onEach { result ->
                 _state.update {
-                    val newMovies = if (result is ResultState.Success) result.data else emptyList()
+                    val newMovies =
+                        if (result is ResultState.Success) result.data.movies else emptyList()
                     val allMovies = it.movies + newMovies
                     it.copy(
                         movies = allMovies,
@@ -76,7 +94,7 @@ class MoviesListViewModel @Inject constructor(
                 }
                 currentPage++
                 isLoadingNextPage = false
-                if(currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
+                if (currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
             }.catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update {
@@ -101,6 +119,7 @@ class MoviesListViewModel @Inject constructor(
 
                 is MovieListContract.Intent.OpenDetails ->
                     _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
+
                 is MovieListContract.Intent.LoadNextPage -> loadNextPage()
             }
         }.collect()
