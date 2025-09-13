@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.core.utils.common_components.movie_details.MovieDetailsRoute
+import com.example.core.utils.common_components.movie.MovieDetailsRoute
 import com.example.feature_movies_list.presentation.MoviesListRoute
 import com.example.feature_search.presentation.MoviesSearchRoute
 
