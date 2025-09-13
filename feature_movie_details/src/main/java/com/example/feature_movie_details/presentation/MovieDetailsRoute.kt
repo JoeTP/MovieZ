@@ -20,8 +20,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -41,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.core.R
+import com.example.core.theme.MovieZTheme
 import com.example.core.utils.common_components.NetworkImage
 import com.example.core.utils.common_components.SmartSpacer
 import com.example.core.utils.common_components.movie.Plus21Tag
@@ -70,42 +73,30 @@ fun MovieDetailsRoute(
 fun MovieDetailsScreen(state: MovieDetailsContract.State, navController: NavHostController) {
 
 
-    Scaffold(topBar = {
-        DefaultTopBar(
-            title = state.movieDetails?.title ?: "",
-            navController = navController,
-            titleCentered = true,
-        )
-    }) { paddingValues ->
+    MovieZTheme(
+        darkTheme = true,
+    ) {
 
-        when {
-            state.isLoading -> LoadingView()
-            state.error != null && state.movieDetails == null -> ErrorView(state.error, {})
-            state.movieDetails != null -> SuccessState(
-                movie = state.movieDetails,
-                modifier = Modifier.padding(paddingValues)
+        Scaffold(topBar = {
+            DefaultTopBar(
+                title = state.movieDetails?.title ?: "",
+                navController = navController,
+                titleCentered = true,
             )
+        }) { paddingValues ->
+
+            when {
+                state.isLoading -> LoadingView()
+                state.error != null && state.movieDetails == null -> ErrorView(state.error, {})
+                state.movieDetails != null -> SuccessState(
+                    movie = state.movieDetails,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
         }
     }
 }
 
-//@Composable
-//fun SuccessState(movie: MovieDetails, modifier: Modifier) {
-//    Box(
-//        modifier = modifier
-//            .fillMaxSize()
-//    ) {
-//        NetworkImage(
-//            modifier = Modifier.fillMaxWidth(),
-//            url = movie.posterUrl,
-//            contentDescription = "movie poster",
-//            contentScale = ContentScale.Fit
-//        )
-//        Surface(Modifier.fillMaxWidth()) {
-//
-//        }
-//    }
-//}
 
 @Composable
 fun SuccessState(movie: MovieDetails, modifier: Modifier) {
@@ -165,8 +156,7 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            //TODO: Remove hardcoded color
-                            Color.Black.copy(alpha = 0.7f),
+                            MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f),
                             shape = roundedCornerShape
                         )
                 ) {
@@ -198,6 +188,7 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
                             "Released ${movie.releaseYear}",
                             style = TextStyle(fontStyle = FontStyle.Italic)
                         )
+                        SmartSpacer(300.dp)
                     }
                 }
             }
@@ -210,8 +201,8 @@ fun TouchIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier
             .width(60.dp)
-            .height(6.dp)
-            .background(Color.White.copy(alpha = 0.6f), shape = RoundedCornerShape(100.dp))
+            .height(5.dp)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), shape = RoundedCornerShape(100.dp))
     )
 }
 

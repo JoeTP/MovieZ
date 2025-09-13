@@ -1,8 +1,6 @@
 package com.example.core.utils.common_components.movie
 
-import android.content.res.Resources
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,17 +34,19 @@ fun MovieCard(
     onClick: () -> Unit,
 ) {
 
-    val color = MaterialTheme.colorScheme.surfaceContainer
+    val cardColor = MaterialTheme.colorScheme.surfaceContainer
+    val titleColor = MaterialTheme.colorScheme.onSurface
+    val borderColor = MaterialTheme.colorScheme.primary
     val shapeOuter = RoundedCornerShape((16 * 1.3).dp)
     Column(
         modifier = modifier
-            .shadow(elevation = 6.dp, spotColor = Color.Green, shape = shapeOuter, clip = false)
-            .background(color = color, shape = shapeOuter)
+            .shadow(elevation = 6.dp, spotColor = borderColor, shape = shapeOuter, clip = false)
+            .background(color = cardColor, shape = shapeOuter)
     ) {
         Column(
             Modifier
                 .clip(shape = shapeOuter)
-                .bottomBorder(2.dp, color = Color.Green)
+                .bottomBorder(2.dp, color = borderColor)
                 .clickable(onClick = onClick)
 
         ) {
@@ -69,12 +69,12 @@ fun MovieCard(
             Text(
                 modifier = Modifier.padding(8.dp).fillMaxWidth(),
                 text = title,
-                // style = titleStyle,
                 maxLines = 2,
                 textAlign =  TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = titleColor
             )
         }
     }
