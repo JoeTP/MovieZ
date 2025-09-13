@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="movie_poster">movie poster</string>
+    <string name="imdb">imdb</string>
+    <string name="genres">Genres: %1$s</string>
+    <string name="tag_line">Tag line: %1$s</string>
+    <string name="languages">Languages: %1$s</string>
+    <string name="country">Country: %1$s</string>
+    <string name="released">Released %1$s</string>
+</resources>

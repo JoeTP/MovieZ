@@ -80,6 +80,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
+    implementation(libs.coil.kt.coil.compose)
+
 
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
