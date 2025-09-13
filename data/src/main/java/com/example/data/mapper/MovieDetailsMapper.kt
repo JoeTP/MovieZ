@@ -26,7 +26,7 @@ fun MovieDetailsDto.toDomain(): MovieDetails = MovieDetails(
     spokenLanguages = spokenLanguages.map { it.toDomain() },
     status = status,
     tagline = tagline,
-    voteAverage = voteAverage,
+    voteAverage = "%.1f".format(voteAverage).toDouble(),
 )
 
 fun GenreDto.toDomain() = Genre(
