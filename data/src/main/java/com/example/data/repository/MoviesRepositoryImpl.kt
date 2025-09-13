@@ -1,23 +1,17 @@
 package com.example.data.repository
 
-import com.example.core.database.entities.MovieEntity
-import com.example.core.network.dto.MovieDto
 import com.example.core.result_states.ResultState
 import com.example.data.mapper.toDomain
 import com.example.data.mapper.toEntity
 import com.example.data.sources.local.MoviesLocalDataSource
 import com.example.data.sources.remote.MoviesRemoteDataSource
-import com.example.domain.model.Movie
+import com.example.domain.model.MovieDetails
 import com.example.domain.model.MoviesPage
 import com.example.domain.repository.MoviesRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import java.io.IOException
 import javax.inject.Inject
 
@@ -90,7 +84,23 @@ class MoviesRepositoryImpl @Inject constructor(
 
     }
 
-//    override suspend fun getMovieById(id: Int): ResultState<Movie>  {
-//
-//    }
+    override suspend fun getMovieById(id: Int): Flow<ResultState<MovieDetails>> = flow {
+        emit(ResultState.Loading)
+        try {
+            val response = remoteDataSource.fetchMovie(id)
+            if(response.isSuccessful){
+                val body = response.body()
+                if(body != null){
+                    emit(ResultState.Success(body.toDomain()))
+                }else{
+                    emit(ResultState.Error("Empty response"))
+                }
+            }else{
+                val errorMsg = response.errorBody()?.string() ?: "Unknown server error"
+                emit(ResultState.Error("HTTP ${response.code()}: $errorMsg"))
+            }
+        }catch (e: IOException){
+            emit(ResultState.Error("Network error: ${e.message}", e))
+        }
+    }
 }

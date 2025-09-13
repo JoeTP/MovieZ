@@ -2,7 +2,7 @@ package com.example.feature_search.presentation
 
 import com.example.domain.model.Movie
 
-sealed class MoviesSearchListContract {
+interface MoviesSearchListContract {
 
     sealed interface Intent {
         data class SearchMovies(val query: String) : Intent

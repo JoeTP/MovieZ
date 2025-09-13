@@ -1,5 +1,6 @@
 package com.example.data.sources.remote
 
+import com.example.core.network.dto.MovieDetailsDto
 import com.example.core.network.dto.MovieDto
 import com.example.core.network.response.MoviesResponse
 import com.example.khatibalamytask.data.remote.MoviesApiService
@@ -12,7 +13,5 @@ class MoviesRemoteDataSourceImpl @Inject constructor(private val service: Movies
 
     override suspend fun search(query: String, page: Int): Response<MoviesResponse> = service.searchMovies(query, page)
 
-    override suspend fun fetchMovie(id: Int): Response<MovieDto> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun fetchMovie(id: Int): Response<MovieDetailsDto> = service.getMovieDetails(id)
 }
