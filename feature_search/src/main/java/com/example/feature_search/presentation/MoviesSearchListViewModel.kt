@@ -36,7 +36,7 @@ class MoviesSearchListViewModel @Inject constructor(
     private val searchQuery = MutableStateFlow("")
     private var currentPage = 1
     private var isLoadingNextPage = false
-    private val maxPage = 500
+    private var maxPage = 500
 
     private val intents = MutableSharedFlow<MoviesSearchListContract.Intent>()
 
@@ -62,7 +62,31 @@ class MoviesSearchListViewModel @Inject constructor(
                 searchMoviesUseCase(params)
             }
             .onEach { result ->
-                _state.update { it.reduce(result) }
+                when (result) {
+                    is ResultState.Success -> {
+                        maxPage = result.data.totalPages
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                movies = result.data.movies,
+                                isEmpty = result.data.movies.isEmpty(),
+                                error = null
+                            )
+                        }
+                    }
+
+                    is ResultState.Loading -> {
+                        _state.update {
+                            it.copy(isLoading = true, error = null)
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        _state.update {
+                            it.copy(isLoading = false, error = result.message)
+                        }
+                    }
+                }
             }
             .catch { e ->
                 val msg = e.message ?: "Unexpected error"
@@ -81,7 +105,7 @@ class MoviesSearchListViewModel @Inject constructor(
                 when (result) {
                     is ResultState.Success -> {
                         _state.update {
-                            val newMovies = result.data
+                            val newMovies = result.data.movies
                             val allMovies = it.movies + newMovies
                             it.copy(
                                 movies = allMovies,

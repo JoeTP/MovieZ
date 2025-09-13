@@ -6,3 +6,9 @@ data class Movie(
     val posterUrl: String?,
     val releaseYear: String?,
 )
+
+data class MoviesPage(
+    val movies: List<Movie>,
+    val totalPages: Int,
+    val currentPage: Int,
+)

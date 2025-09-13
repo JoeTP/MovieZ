@@ -8,6 +8,7 @@ import com.example.data.mapper.toEntity
 import com.example.data.sources.local.MoviesLocalDataSource
 import com.example.data.sources.remote.MoviesRemoteDataSource
 import com.example.domain.model.Movie
+import com.example.domain.model.MoviesPage
 import com.example.domain.repository.MoviesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,13 +25,15 @@ class MoviesRepositoryImpl @Inject constructor(
     private val remoteDataSource: MoviesRemoteDataSource,
     private val localDataSource: MoviesLocalDataSource,
 ) : MoviesRepository {
-    override fun getMovies(page: Int): Flow<ResultState<List<Movie>>> = flow {
+
+    override fun getMovies(page: Int): Flow<ResultState<MoviesPage>> = flow {
         emit(ResultState.Loading)
         val localMoviesFlow = localDataSource.retrievePopularMovies()
             .map { entities -> entities.map { it.toDomain() } }
         val cachedMovies = localMoviesFlow.firstOrNull() ?: emptyList()
+
         if (cachedMovies.isNotEmpty() && page == 1) {
-            emit(ResultState.Success(cachedMovies))
+            emit(ResultState.Success(MoviesPage(cachedMovies, 1, page)))
         }
         try {
             val response = remoteDataSource.fetchPopularMovies(page)
@@ -39,7 +42,8 @@ class MoviesRepositoryImpl @Inject constructor(
                 if (body != null) {
                     val movieEntity = body.results.map { it.toEntity() }
                     if (page == 1) localDataSource.cacheAndUpdateMovies(movieEntity)
-                    emit(ResultState.Success(body.results.map { it.toDomain() }))
+                    val movieDomain = movieEntity.map { it.toDomain() }
+                    emit(ResultState.Success(MoviesPage(movieDomain, body.totalPages, page)))
                 } else {
                     if (cachedMovies.isEmpty()) {
                         emit(ResultState.Error("Empty response"))
@@ -62,15 +66,15 @@ class MoviesRepositoryImpl @Inject constructor(
         }
     }
 
-
-    override fun search(query: String, page: Int): Flow<ResultState<List<Movie>>> = flow {
+    override fun search(query: String, page: Int): Flow<ResultState<MoviesPage>> = flow {
         emit(ResultState.Loading)
         try {
             val response = remoteDataSource.search(query, page)
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    emit(ResultState.Success(body.results.map { it.toDomain() }))
+                    val movieDomain = body.results.map { it.toDomain() }
+                    emit(ResultState.Success(MoviesPage(movieDomain, body.totalPages, page)))
                 } else {
                     emit(ResultState.Error("Empty response"))
                 }
