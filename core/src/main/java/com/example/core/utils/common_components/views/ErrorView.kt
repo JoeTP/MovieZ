@@ -1,9 +1,8 @@
-package com.example.core.utils.common_components
+package com.example.core.utils.common_components.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +17,5 @@ fun ErrorView(message: String, onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(message, color = Color.Red)
-        Button(onClick = onRetry) { Text("Retry") }
     }
 }

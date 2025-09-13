@@ -32,41 +32,46 @@ class MoviesListViewModel @Inject constructor(
 
     private val intents = MutableSharedFlow<MovieListContract.Intent>()
 
-    private var currentPage = 1
+    var currentPage = 1
     private var isLoadingNextPage = false
-    private val maxPage = 500
+    private var maxPage = 500
 
     init {
         processIntents()
-        sendIntent(MovieListContract.Intent.Load)
     }
 
     fun sendIntent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
 
-
-    private fun processIntents() = viewModelScope.launch {
-        intents.onEach { intent ->
-            when (intent) {
-                MovieListContract.Intent.Load,
-                is MovieListContract.Intent.Retry,
-                    -> loadMovies()
-
-                is MovieListContract.Intent.OpenDetails ->
-                    _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
-
-                is MovieListContract.Intent.Search -> {
-                    _effects.emit(MovieListContract.Effect.OpenSearch(intent.query))
-                }
-            }
-        }.collect()
-    }
 
     private fun loadMovies() = viewModelScope.launch {
         getMoviesUseCase(currentPage)
             .onEach { result ->
                 _state.update {
                     Log.d("TAG", "loadMovies: $result")
-                    it.reduce(result)
+                    when (result) {
+                        is ResultState.Loading -> it.copy(
+                            isLoading = true,
+                            error = null,
+                            isLoadingNextPage = false
+                        )
+                        is ResultState.Success -> {
+                            maxPage = result.data.totalPages
+                            it.copy(
+                                isLoading = false,
+                                movies = result.data.movies,
+                                isEmpty = result.data.movies.isEmpty(),
+                                error = null,
+                                isLoadingNextPage = false
+                            )
+                        }
+
+                        is ResultState.Error -> it.copy(
+                            isLoading = false,
+                            error = result.message,
+                            isLoadingNextPage = false
+                        )
+                    }
+
                 }
             }
             .catch { e ->
@@ -76,25 +81,40 @@ class MoviesListViewModel @Inject constructor(
             }.collect()
     }
 
-    fun loadNextPage() {
+    private fun loadNextPage() {
         if (isLoadingNextPage || currentPage >= maxPage) return
         isLoadingNextPage = true
         _state.update { it.copy(isLoadingNextPage = true) }
         viewModelScope.launch {
             getMoviesUseCase(currentPage + 1).onEach { result ->
-                _state.update {
-                    val newMovies = if (result is ResultState.Success) result.data else emptyList()
-                    val allMovies = it.movies + newMovies
-                    it.copy(
-                        movies = allMovies,
-                        isLoading = false,
-                        error = null,
+                when (result) {
+                    is ResultState.Loading -> {
+                        _state.update { it.copy(isLoadingNextPage = true) }
+                    }
+                    is ResultState.Success -> {
+                        val newMovies = result.data.movies
+                        _state.update { prev ->
+                            val allMovies = prev.movies + newMovies
+                            prev.copy(
+                                movies = allMovies,
+                                isLoading = false,
+                                error = null,
+                                isLoadingNextPage = false,
+                                isEmpty = allMovies.isEmpty()
+                            )
+                        }
+                        currentPage++
+                        if (currentPage >= maxPage) {
+                            _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
+                        }
                         isLoadingNextPage = false
-                    )
+                    }
+                    is ResultState.Error -> {
+                        _state.update { it.copy(isLoading = false, error = result.message, isLoadingNextPage = false) }
+                        _effects.emit(MovieListContract.Effect.ShowMessage(result.message ?: "Unexpected error"))
+                        isLoadingNextPage = false
+                    }
                 }
-                currentPage++
-                isLoadingNextPage = false
-               if(currentPage >= maxPage) _effects.emit(MovieListContract.Effect.ShowMessage("Free Limit Reached"))
             }.catch { e ->
                 val msg = e.message ?: "Unexpected error"
                 _state.update {
@@ -108,5 +128,24 @@ class MoviesListViewModel @Inject constructor(
                 isLoadingNextPage = false
             }.collect()
         }
+    }
+
+    private fun processIntents() = viewModelScope.launch {
+        intents.onEach { intent ->
+            when (intent) {
+                is MovieListContract.Intent.Retry, MovieListContract.Intent.Load
+                    -> {
+                        currentPage = 1
+                        _state.update { it.copy(movies = emptyList(), isEmpty = false, error = null) }
+                        loadMovies()
+                    }
+
+                is MovieListContract.Intent.OpenDetails -> {
+                    _effects.emit(MovieListContract.Effect.NavigateToDetails(intent.id))
+                }
+
+                is MovieListContract.Intent.LoadNextPage -> loadNextPage()
+            }
+        }.collect()
     }
 }
