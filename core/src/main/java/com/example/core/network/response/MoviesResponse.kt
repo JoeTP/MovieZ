@@ -8,8 +8,8 @@ data class MoviesResponse(
     val page: Long,
     val results: List<MovieDto>,
     @SerializedName("total_pages")
-    val totalPages: Long,
+    val totalPages: Int,
     @SerializedName("total_results")
-    val totalResults: Long
+    val totalResults: Int
 )
 

@@ -8,7 +8,7 @@ interface MovieListContract {
         data object Load : Intent
         data object Retry : Intent
         data class OpenDetails(val id: Int) : Intent
-        data class Search(val query: String) : Intent
+        data object LoadNextPage : Intent
     }
 
     data class State(
