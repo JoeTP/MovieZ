@@ -62,7 +62,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(platform(libs.androidx.compose.bom))
 
+    // Unit testing
     testImplementation(libs.junit)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
