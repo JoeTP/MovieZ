@@ -36,4 +36,15 @@ dependencies {
 
     implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.core)
+
+
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit.ktx)
+    testImplementation(libs.core.ktx)
+    testImplementation(libs.androidx.core.testing)
+
 }
