@@ -26,32 +26,37 @@ class MoviesRepositoryImpl @Inject constructor(
 
     //This wasn't intended but I had to put it as a fast solution to filter uncensored movies
     //==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>
-    private val filter = listOf(
-        mapOf("id" to 28, "name" to "Action"),
-        mapOf("id" to 12, "name" to "Adventure"),
-        mapOf("id" to 16, "name" to "Animation"),
-        mapOf("id" to 35, "name" to "Comedy"),
-        mapOf("id" to 80, "name" to "Crime"),
-        mapOf("id" to 99, "name" to "Documentary"),
-//    mapOf("id" to 18, "name" to "Drama"),
-        mapOf("id" to 10751, "name" to "Family"),
-        mapOf("id" to 14, "name" to "Fantasy"),
-        mapOf("id" to 36, "name" to "History"),
-        mapOf("id" to 27, "name" to "Horror"),
-        mapOf("id" to 10402, "name" to "Music"),
-        mapOf("id" to 9648, "name" to "Mystery"),
-//    mapOf("id" to 10749, "name" to "Romance"),
-        mapOf("id" to 878, "name" to "Science Fiction"),
-        mapOf("id" to 10770, "name" to "TV Movie"),
-        mapOf("id" to 53, "name" to "Thriller"),
-        mapOf("id" to 10752, "name" to "War"),
-        mapOf("id" to 37, "name" to "Western")
-    )
+//    private val filter = listOf(
+//        mapOf("id" to 28, "name" to "Action"),
+//        mapOf("id" to 12, "name" to "Adventure"),
+//        mapOf("id" to 16, "name" to "Animation"),
+//        mapOf("id" to 35, "name" to "Comedy"),
+//        mapOf("id" to 80, "name" to "Crime"),
+//        mapOf("id" to 99, "name" to "Documentary"),
+////    mapOf("id" to 18, "name" to "Drama"),
+//        mapOf("id" to 10751, "name" to "Family"),
+//        mapOf("id" to 14, "name" to "Fantasy"),
+//        mapOf("id" to 36, "name" to "History"),
+//        mapOf("id" to 27, "name" to "Horror"),
+//        mapOf("id" to 10402, "name" to "Music"),
+//        mapOf("id" to 9648, "name" to "Mystery"),
+////    mapOf("id" to 10749, "name" to "Romance"),
+//        mapOf("id" to 878, "name" to "Science Fiction"),
+//        mapOf("id" to 10770, "name" to "TV Movie"),
+//        mapOf("id" to 53, "name" to "Thriller"),
+//        mapOf("id" to 10752, "name" to "War"),
+//        mapOf("id" to 37, "name" to "Western")
+//    )
 
     /**
-     * Filters drama only, romance and drama, romance only, mystery and drama and thriller, empty genreIds
+     * Filters:
+     * drama only,
+     * romance and drama,
+     * romance only,
+     * mystery and drama and thriller,
+     * empty genreIds
      */
-    fun uncensoredMoviesFilter(movies: List<MovieDto>): List<MovieDto> {
+    private fun uncensoredMoviesFilter(movies: List<MovieDto>): List<MovieDto> {
         return movies.filterNot {
             (it.genreIds.contains(18) && it.genreIds.contains(10749)) || (it.genreIds.contains(10749) &&
                     it.genreIds.size == 1) || (it.genreIds.contains(18) && it.genreIds.size == 1) || (it.genreIds.contains(
@@ -92,13 +97,13 @@ class MoviesRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: IOException) {
-            if (cachedMovies.isEmpty()) {
+//            if (cachedMovies.isEmpty()) {
                 emit(ResultState.Error(e.userMessage(), e))
-            }
+//            }
         } catch (t: Throwable) {
-            if (cachedMovies.isEmpty()) {
+//            if (cachedMovies.isEmpty()) {
                 emit(ResultState.Error(t.userMessage(), t))
-            }
+//            }
         }
     }.flowOn(Dispatchers.IO)
 

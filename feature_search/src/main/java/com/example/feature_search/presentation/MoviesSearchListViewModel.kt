@@ -41,6 +41,8 @@ class MoviesSearchListViewModel @Inject constructor(
     private var isLoadingNextPage = false
     private var maxPage = 500
 
+    private var lastSnackMsg: String? = null
+
     private val intents = MutableSharedFlow<MoviesSearchListContract.Intent>()
 
 
@@ -91,7 +93,6 @@ class MoviesSearchListViewModel @Inject constructor(
             }
             .catch { e ->
                 val msg = e.userMessage()
-                Log.e("Error", "observeSearch: ", e)
                 _effects.emit(ShowMessage(msg))
                 _state.update { it.copy(isLoading = false, error = msg) }
             }.collect()
@@ -106,7 +107,6 @@ class MoviesSearchListViewModel @Inject constructor(
             searchMoviesUseCase(params).onEach { result ->
                 when (result) {
                     is ResultState.Success -> {
-//                        maxPage = result.data.totalPages
                         _state.update { prev ->
                             val newMovies = result.data.movies
                             val allMovies = prev.movies + newMovies
@@ -135,7 +135,11 @@ class MoviesSearchListViewModel @Inject constructor(
                                 isLoadingNextPage = false
                             )
                         }
-                        _effects.emit(ShowMessage(result.message))
+                        val msg = result.message
+                        if (msg != lastSnackMsg) {
+                            lastSnackMsg = msg
+                            _effects.emit(ShowMessage(msg))
+                        }
                         isLoadingNextPage = false
                     }
                 }

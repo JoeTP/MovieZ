@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +39,7 @@ import com.example.domain.model.Movie
 fun MoviesSearchRoute(
     navController: NavHostController,
     vm: MoviesSearchListViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState,
     onMovieClick: (Int) -> Unit,
 ) {
 
@@ -48,8 +50,7 @@ fun MoviesSearchRoute(
         vm.effects.collect { effect ->
             when (effect) {
                 is MoviesSearchListContract.Effect.ShowMessage ->
-                    Toast.makeText(ctx, effect.msg, Toast.LENGTH_SHORT).show()
-
+                    snackbarHostState.showSnackbar(effect.msg)
                 is MoviesSearchListContract.Effect.NavigateToDetails ->
                     onMovieClick(effect.id)
             }
