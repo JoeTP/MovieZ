@@ -24,24 +24,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MovieZTheme {
-                MainLayout()
+                AppNavSetup()
             }
         }
-    }
-}
-
-
-@Composable
-fun MainLayout() {
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    Scaffold(modifier = Modifier.fillMaxSize(), snackbarHost = {
-        SnackbarHost(hostState = snackbarHostState)
-    }) { innerPadding ->
-        AppNavSetup(
-            modifier = Modifier.padding(innerPadding),
-            navController = rememberNavController(), snackbarHostState = snackbarHostState,
-        )
     }
 }
