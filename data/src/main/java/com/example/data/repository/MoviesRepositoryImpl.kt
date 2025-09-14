@@ -19,6 +19,14 @@ import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * Repository implementation that orchestrates data from remote and local sources.
+ *
+ * Notes:
+ * - All returned flows are confined to IO via [flowOn(Dispatchers.IO)].
+ * - Popular movies (page 1) are cached locally and served immediately on next app launch.
+ * - A temporary content filter is applied to exclude certain genres (see [uncensoredMoviesFilter]).
+ */
 class MoviesRepositoryImpl @Inject constructor(
     private val remoteDataSource: MoviesRemoteDataSource,
     private val localDataSource: MoviesLocalDataSource,
@@ -49,12 +57,17 @@ class MoviesRepositoryImpl @Inject constructor(
 //    )
 
     /**
-     * Filters:
-     * drama only,
-     * romance and drama,
-     * romance only,
-     * mystery and drama and thriller,
-     * empty genreIds
+     * Filters out movies considered uncensored for the app experience.
+     *
+     * Rules of filtering:
+     * - drama only
+     * - romance and drama
+     * - romance only
+     * - mystery + romance + thriller
+     * - empty genreIds
+     *
+     * @param movies Raw movies from Api response.
+     * @return A list that excludes the unwanted combinations.
      */
     private fun uncensoredMoviesFilter(movies: List<MovieDto>): List<MovieDto> {
         return movies.filterNot {
@@ -66,6 +79,25 @@ class MoviesRepositoryImpl @Inject constructor(
     }
     //==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>
 
+    /**
+     * Retrieves popular movies for a given page.
+     *
+     * Behavior:
+     * - Emits Loading first.
+     * - If page == 1 and local cache has data, emits cached data immediately.
+     * - Fetches remote page; on success:
+     *   - Applies [uncensoredMoviesFilter].
+     *   - Caches page 1 to local storage.
+     *   - Emits Success with domain models and total pages.
+     * - On error:
+     *   - If cache is empty, emits a user-friendly error.
+     *
+     * Threading:
+     * - Upstream work runs on [Dispatchers.IO] via [flowOn].
+     *
+     * @param page The page number to retrieve.
+     * @return A flow of [ResultState] containing [MoviesPage] data.
+     */
     override fun getMovies(page: Int): Flow<ResultState<MoviesPage>> = flow {
         emit(ResultState.Loading)
         val localMoviesFlow = localDataSource.retrievePopularMovies()
@@ -97,16 +129,26 @@ class MoviesRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: IOException) {
-//            if (cachedMovies.isEmpty()) {
                 emit(ResultState.Error(e.userMessage(), e))
-//            }
         } catch (t: Throwable) {
-//            if (cachedMovies.isEmpty()) {
                 emit(ResultState.Error(t.userMessage(), t))
-//            }
         }
     }.flowOn(Dispatchers.IO)
 
+    /**
+     * Searches for movies matching the provided [query] at the given [page].
+     *
+     * Behavior:
+     * - Emits Loading, then Success with filtered domain results, or user-friendly Error.
+     * - Applies [uncensoredMoviesFilter] to remove undesired content.
+     *
+     * Threading:
+     * - Upstream work runs on [Dispatchers.IO] via [flowOn].
+     *
+     * @param query The search query.
+     * @param page The page number to retrieve.
+     * @return A flow of [ResultState] containing [MoviesPage] data.
+     */
     override fun search(query: String, page: Int): Flow<ResultState<MoviesPage>> = flow {
         emit(ResultState.Loading)
         try {
@@ -133,12 +175,25 @@ class MoviesRepositoryImpl @Inject constructor(
 
     }.flowOn(Dispatchers.IO)
 
+    /**
+     * Fetches movie details for a specific [id].
+     *
+     * Behavior:
+     * - Emits Loading, then Success with domain details, or user-friendly Error.
+     *
+     * Threading:
+     * - Upstream work runs on [Dispatchers.IO] via [flowOn].
+     *
+     * @param id The movie ID to retrieve.
+     * @return A flow of [ResultState] containing [MovieDetails] data.
+     */
     override suspend fun getMovieById(id: Int): Flow<ResultState<MovieDetails>> = flow {
         emit(ResultState.Loading)
         try {
             val response = remoteDataSource.fetchMovie(id)
             if (response.isSuccessful) {
                 val body = response.body()
+
                 if (body != null) {
                     emit(ResultState.Success(body.toDomain()))
                 } else {

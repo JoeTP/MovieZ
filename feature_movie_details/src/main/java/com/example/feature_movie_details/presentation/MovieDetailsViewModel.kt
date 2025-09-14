@@ -28,9 +28,21 @@ class MovieDetailsViewModel @Inject constructor(private val getMovieDetailsUseCa
         processIntent()
     }
 
+    /**
+     * Sends an intent to this ViewModel to be handled by [processIntent].
+     *
+     * @param i An instance of [MovieDetailsContract.Intent] describing a user/event action.
+     */
     fun sendIntent(i: MovieDetailsContract.Intent) = viewModelScope.launch { intents.emit(i) }
 
-
+    /**
+     * Loads movie details for the given [movieId] and updates the state accordingly.
+     *
+     * Emits:
+     * - Loading: while fetching data
+     * - Success: with [movieDetails]
+     * - Error: with an Exception message
+     */
     fun getMovieDetails(movieId: Int) = viewModelScope.launch {
         getMovieDetailsUseCase(movieId).onEach { result ->
             _state.update {
@@ -56,6 +68,13 @@ class MovieDetailsViewModel @Inject constructor(private val getMovieDetailsUseCa
         }.collect()
     }
 
+    /**
+     * Central intent processor for the details screen.
+     *
+     * Supported intents:
+     * - [MovieDetailsContract.Intent.Load]: Loads the details for the provided id.
+     * - [MovieDetailsContract.Intent.Retry]: Retries loading with the same id.
+     */
     private fun processIntent() = viewModelScope.launch {
         intents.onEach { intent ->
             when (intent) {
