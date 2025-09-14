@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -55,10 +56,10 @@ fun MoviesListRoute(
     vm: MoviesListViewModel = hiltViewModel(),
     onMovieClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
-    snackbarHostState: SnackbarHostState,
 ) {
 
     val state by vm.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         vm.effects.collect { effect ->
@@ -76,6 +77,7 @@ fun MoviesListRoute(
 
     MoviesListScreen(
         state = state,
+        snackbarHostState = snackbarHostState,
         onRetry = { vm.sendIntent(MovieListContract.Intent.Retry) },
         onMovieClick = { id -> onMovieClick(id) },
         onSearchClick = onSearchClick,
@@ -89,6 +91,7 @@ fun MoviesListRoute(
 @Composable
 fun MoviesListScreen(
     state: MovieListContract.State,
+    snackbarHostState: SnackbarHostState,
     onRetry: () -> Unit,
     onLoadNextPage: () -> Unit,
     onMovieClick: (Int) -> Unit,
@@ -125,7 +128,10 @@ fun MoviesListScreen(
                 containerColor = MaterialTheme.colorScheme.background,
             )
         )
-    }) {
+    },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }) {
         Box(
             Modifier
                 .padding(it)

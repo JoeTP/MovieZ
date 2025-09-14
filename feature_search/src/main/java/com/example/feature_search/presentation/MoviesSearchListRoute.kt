@@ -12,12 +12,14 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -39,13 +41,12 @@ import com.example.domain.model.Movie
 fun MoviesSearchRoute(
     navController: NavHostController,
     vm: MoviesSearchListViewModel = hiltViewModel(),
-    snackbarHostState: SnackbarHostState,
     onMovieClick: (Int) -> Unit,
 ) {
 
     val state by vm.state.collectAsStateWithLifecycle()
-    val ctx = LocalContext.current
 
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
         vm.effects.collect { effect ->
             when (effect) {
@@ -59,6 +60,7 @@ fun MoviesSearchRoute(
 
     MoviesSearchScreen(
         navController = navController,
+        snackbarHostState = snackbarHostState,
         state = state,
         onLoadNextPage = { vm.sendIntent(MoviesSearchListContract.Intent.LoadNextPage) },
         onMovieClick = onMovieClick,
@@ -71,6 +73,7 @@ fun MoviesSearchRoute(
 @Composable
 fun MoviesSearchScreen(
     navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
     state: MoviesSearchListContract.State,
     onQueryChange: (String) -> Unit,
     onLoadNextPage: () -> Unit,
@@ -94,6 +97,8 @@ fun MoviesSearchScreen(
                 },
             )
         }, navigationIcon = { BackButton(navController) })
+    }, snackbarHost = {
+        SnackbarHost(hostState = snackbarHostState)
     }) {
         Box(
             modifier = Modifier
