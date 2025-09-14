@@ -1,5 +1,6 @@
 package com.example.data.repository
 
+import com.example.core.network.dto.MovieDto
 import com.example.core.result_states.ResultState
 import com.example.data.mapper.toDomain
 import com.example.data.mapper.toEntity
@@ -14,11 +15,49 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.collections.filterNot
 
 class MoviesRepositoryImpl @Inject constructor(
     private val remoteDataSource: MoviesRemoteDataSource,
     private val localDataSource: MoviesLocalDataSource,
 ) : MoviesRepository {
+
+    //This wasn't intended but I had to put it as a fast solution to filter uncensored movies
+    //==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>
+    private val filter = listOf(
+        mapOf("id" to 28, "name" to "Action"),
+        mapOf("id" to 12, "name" to "Adventure"),
+        mapOf("id" to 16, "name" to "Animation"),
+        mapOf("id" to 35, "name" to "Comedy"),
+        mapOf("id" to 80, "name" to "Crime"),
+        mapOf("id" to 99, "name" to "Documentary"),
+//    mapOf("id" to 18, "name" to "Drama"),
+        mapOf("id" to 10751, "name" to "Family"),
+        mapOf("id" to 14, "name" to "Fantasy"),
+        mapOf("id" to 36, "name" to "History"),
+        mapOf("id" to 27, "name" to "Horror"),
+        mapOf("id" to 10402, "name" to "Music"),
+        mapOf("id" to 9648, "name" to "Mystery"),
+//    mapOf("id" to 10749, "name" to "Romance"),
+        mapOf("id" to 878, "name" to "Science Fiction"),
+        mapOf("id" to 10770, "name" to "TV Movie"),
+        mapOf("id" to 53, "name" to "Thriller"),
+        mapOf("id" to 10752, "name" to "War"),
+        mapOf("id" to 37, "name" to "Western")
+    )
+
+    /**
+     * Filters drama only, romance and drama, romance only, mystery and drama and thriller, empty genreIds
+     */
+    fun uncensoredMoviesFilter(movies: List<MovieDto>): List<MovieDto> {
+        return movies.filterNot {
+            (it.genreIds.contains(18) && it.genreIds.contains(10749)) || (it.genreIds.contains(10749) &&
+                    it.genreIds.size == 1) || (it.genreIds.contains(18) && it.genreIds.size == 1) || (it.genreIds.contains(
+                9648
+            ) && it.genreIds.contains(10749) && it.genreIds.contains(53) || it.genreIds.isEmpty())
+        }
+    }
+    //==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>
 
     override fun getMovies(page: Int): Flow<ResultState<MoviesPage>> = flow {
         emit(ResultState.Loading)
@@ -34,7 +73,10 @@ class MoviesRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    val movieEntity = body.results.map { it.toEntity() }
+
+                    val movies = body.results
+                    val filteredMovies = uncensoredMoviesFilter(movies)
+                    val movieEntity = filteredMovies.map { it.toEntity() }
                     if (page == 1) localDataSource.cacheAndUpdateMovies(movieEntity)
                     val movieDomain = movieEntity.map { it.toDomain() }
                     emit(ResultState.Success(MoviesPage(movieDomain, body.totalPages, page)))
@@ -88,18 +130,18 @@ class MoviesRepositoryImpl @Inject constructor(
         emit(ResultState.Loading)
         try {
             val response = remoteDataSource.fetchMovie(id)
-            if(response.isSuccessful){
+            if (response.isSuccessful) {
                 val body = response.body()
-                if(body != null){
+                if (body != null) {
                     emit(ResultState.Success(body.toDomain()))
-                }else{
+                } else {
                     emit(ResultState.Error("Empty response"))
                 }
-            }else{
+            } else {
                 val errorMsg = response.errorBody()?.string() ?: "Unknown server error"
                 emit(ResultState.Error("HTTP ${response.code()}: $errorMsg"))
             }
-        }catch (e: IOException){
+        } catch (e: IOException) {
             emit(ResultState.Error("Network error: ${e.message}", e))
         }
     }
