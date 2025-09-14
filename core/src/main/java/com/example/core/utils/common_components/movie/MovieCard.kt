@@ -57,7 +57,7 @@ fun MovieCard(
                 NetworkImage(
                     Modifier
                         .height(260.dp),
-                    posterUrl
+                    posterUrl,
                 )
                 Text(
                     modifier = Modifier

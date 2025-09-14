@@ -6,12 +6,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -84,10 +89,25 @@ fun MoviesListScreen(
     onSearchClick: () -> Unit,
 ) {
 
+
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(stringResource(R.string.popular_movies)) },
             actions = {
+                if (state.isLoading) CircularProgressIndicator(
+                    color = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                ) else {
+                    IconButton(onClick = onRetry) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            contentDescription = stringResource(
+                                R.string.refresh
+                            )
+                        )
+                    }
+                }
                 IconButton(onClick = onSearchClick) {
                     Icon(
                         Icons.Default.Search,
