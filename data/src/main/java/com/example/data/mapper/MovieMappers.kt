@@ -1,15 +1,9 @@
 package com.example.data.mapper
 
 import com.example.core.database.entities.MovieEntity
-import com.example.core.network.dto.GenreDto
-import com.example.core.network.dto.MovieDetailsDto
 import com.example.core.network.dto.MovieDto
-import com.example.core.network.dto.SpokenLanguageDto
 import com.example.core.utils.constants.AppStrings.Companion.IMAGE_URL
-import com.example.domain.model.Genre
 import com.example.domain.model.Movie
-import com.example.domain.model.MovieDetails
-import com.example.domain.model.SpokenLanguage
 
 fun MovieDto.toEntity() = MovieEntity(
     id = id,

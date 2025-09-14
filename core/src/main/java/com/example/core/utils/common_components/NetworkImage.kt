@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import coil.size.Size
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import coil3.request.crossfade
 import coil3.request.fallback
 import coil3.request.placeholder
 import com.example.core.R
@@ -15,7 +16,7 @@ import com.example.core.R
 fun NetworkImage(
     modifier: Modifier = Modifier,
     url: String?,
-    contentDescription: String = "",
+    contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop
 ) {
     AsyncImage(

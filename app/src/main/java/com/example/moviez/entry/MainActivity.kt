@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.moviez.navigation.AppNavSetup
 import com.example.core.theme.MovieZTheme
+import com.example.moviez.navigation.AppNavSetup
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,24 +24,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MovieZTheme {
-                MainLayout()
+                AppNavSetup()
             }
         }
-    }
-}
-
-
-@Composable
-fun MainLayout() {
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    Scaffold(modifier = Modifier.fillMaxSize(), snackbarHost = {
-        SnackbarHost(hostState = snackbarHostState)
-    }) { innerPadding ->
-        AppNavSetup(
-            modifier = Modifier.padding(innerPadding),
-            navController = rememberNavController(), snackbarHostState = snackbarHostState,
-        )
     }
 }
