@@ -60,11 +60,18 @@ fun MovieDetailsRoute(
     }
 
 
-    MovieDetailsScreen(state = state.value, navController = navController)
+    MovieDetailsScreen(
+        state = state.value,
+        navController = navController,
+        onRetry = { vm.sendIntent(MovieDetailsContract.Intent.Retry(id)) })
 }
 
 @Composable
-fun MovieDetailsScreen(state: MovieDetailsContract.State, navController: NavHostController) {
+fun MovieDetailsScreen(
+    state: MovieDetailsContract.State,
+    navController: NavHostController,
+    onRetry: () -> Unit,
+) {
 
 
     MovieZTheme(
@@ -81,7 +88,7 @@ fun MovieDetailsScreen(state: MovieDetailsContract.State, navController: NavHost
 
             when {
                 state.isLoading -> LoadingView()
-                state.error != null && state.movieDetails == null -> ErrorView(state.error, {})
+                state.error != null && state.movieDetails == null -> ErrorView(state.error, onRetry)
                 state.movieDetails != null -> SuccessState(
                     movie = state.movieDetails,
                     modifier = Modifier.padding(paddingValues)
@@ -98,7 +105,8 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
     val radius = 40.dp
     val roundedCornerShape = RoundedCornerShape(topStart = radius, topEnd = radius)
 
-    val languages = movie.spokenLanguages.joinToString(", ") { it.englishName }.split(",").joinToString(", ")
+    val languages =
+        movie.spokenLanguages.joinToString(", ") { it.englishName }.split(",").joinToString(", ")
     val countries = movie.originCountry.joinToString(", ")
     val genres = movie.genres.joinToString(", ") { it.name }
     val tagline = movie.tagline?.split(". ")?.joinToString(" / ")
@@ -185,12 +193,14 @@ fun SuccessState(movie: MovieDetails, modifier: Modifier) {
                             stringResource(
                                 R.string.languages,
                                 languages
-                            ))
+                            )
+                        )
                         Text(
                             stringResource(
                                 R.string.country,
                                 countries
-                            ))
+                            )
+                        )
                         movie.releaseYear?.let {
                             Text(
                                 text = stringResource(

@@ -1,8 +1,10 @@
 package com.example.feature_search.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.result_states.ResultState
+import com.example.core.result_states.userMessage
 import com.example.domain.usecases.SearchMoviesUseCase
 import com.example.domain.usecases.SearchMoviesUseCaseParams
 import com.example.feature_search.presentation.MoviesSearchListContract.Effect.NavigateToDetails
@@ -88,7 +90,8 @@ class MoviesSearchListViewModel @Inject constructor(
                 }
             }
             .catch { e ->
-                val msg = e.message ?: "Unexpected error"
+                val msg = e.userMessage()
+                Log.e("Error", "observeSearch: ", e)
                 _effects.emit(ShowMessage(msg))
                 _state.update { it.copy(isLoading = false, error = msg) }
             }.collect()
@@ -137,7 +140,7 @@ class MoviesSearchListViewModel @Inject constructor(
                     }
                 }
             }.catch { e ->
-                val msg = e.message ?: "Unexpected error"
+                val msg = e.userMessage()
                 _state.update {
                     it.copy(
                         isLoading = false,

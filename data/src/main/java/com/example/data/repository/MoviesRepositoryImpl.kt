@@ -2,6 +2,7 @@ package com.example.data.repository
 
 import com.example.core.network.dto.MovieDto
 import com.example.core.result_states.ResultState
+import com.example.core.result_states.userMessage
 import com.example.data.mapper.toDomain
 import com.example.data.mapper.toEntity
 import com.example.data.sources.local.MoviesLocalDataSource
@@ -92,11 +93,11 @@ class MoviesRepositoryImpl @Inject constructor(
             }
         } catch (e: IOException) {
             if (cachedMovies.isEmpty()) {
-                emit(ResultState.Error("Network error: ${e.message}", e))
+                emit(ResultState.Error(e.userMessage(), e))
             }
         } catch (t: Throwable) {
             if (cachedMovies.isEmpty()) {
-                emit(ResultState.Error("Unexpected error: ${t.message}", t))
+                emit(ResultState.Error(t.userMessage(), t))
             }
         }
     }.flowOn(Dispatchers.IO)
@@ -120,9 +121,9 @@ class MoviesRepositoryImpl @Inject constructor(
                 emit(ResultState.Error("HTTP ${response.code()}: $errorMsg"))
             }
         } catch (e: IOException) {
-            emit(ResultState.Error("Network error: ${e.message}", e))
+            emit(ResultState.Error(e.userMessage(), e))
         } catch (t: Throwable) {
-            emit(ResultState.Error("Unexpected error: ${t.message}", t))
+            emit(ResultState.Error(t.userMessage(), t))
         }
 
     }.flowOn(Dispatchers.IO)
@@ -143,7 +144,7 @@ class MoviesRepositoryImpl @Inject constructor(
                 emit(ResultState.Error("HTTP ${response.code()}: $errorMsg"))
             }
         } catch (e: IOException) {
-            emit(ResultState.Error("Network error: ${e.message}", e))
+            emit(ResultState.Error(e.userMessage(), e))
         }
     }.flowOn(Dispatchers.IO)
 }

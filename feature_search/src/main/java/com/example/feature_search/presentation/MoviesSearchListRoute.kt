@@ -104,7 +104,7 @@ fun MoviesSearchScreen(
                     LoadingView()
 
                 state.error != null && state.movies.isEmpty() ->
-                    ErrorView(state.error, { })
+                    ErrorView(state.error)
 
                 state.isEmpty &&  searchQuery.isEmpty()->
                     EmptyView()
