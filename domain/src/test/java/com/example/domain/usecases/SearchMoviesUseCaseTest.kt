@@ -9,6 +9,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -24,15 +25,15 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class GetMoviesUseCaseTest {
+class SearchMoviesUseCaseTest {
 
     private val repo: MoviesRepository = mockk(relaxed = true)
-    private lateinit var useCase: GetMoviesUseCase
+    private lateinit var useCase: SearchMoviesUseCase
 
     @Before
     fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        useCase = GetMoviesUseCase(repo)
+        useCase = SearchMoviesUseCase(repo)
     }
 
     @After
@@ -41,47 +42,45 @@ class GetMoviesUseCaseTest {
     }
 
     @Test
-    fun `emits Success when repository succeeds`() = runTest {
+    fun `emits Success for query when repository succeeds`() = runTest {
+        val params = SearchMoviesUseCaseParams(query = "batman", page = 1)
         val movie = Movie(
-            id = 2244,
-            title = "Delicata",
-            posterUrl = "https://example.com/tristique.jpg",
-            releaseYear = "1998"
+            id = 6481,
+            title = "fabellas",
+            posterUrl = "https://duckduckgo.com/?q=ponderum",
+            releaseYear = "2000"
         )
-        val mockMoviePage = MoviesPage(
+        val mockMoviesPage = MoviesPage(
             currentPage = 1,
-            totalPages = 20,
+            totalPages = 200,
             movies = listOf(movie)
         )
 
-
-        coEvery { repo.getMovies(1) } returns flow {
-            emit(ResultState.Success(mockMoviePage))
+        coEvery { repo.search(params.query, params.page) } returns flow {
+            emit(ResultState.Success(mockMoviesPage))
         }
 
-        val collector = useCase(1).first()
+        val collector = useCase(params).first()
 
         val success = collector as ResultState.Success
-        assertEquals(mockMoviePage, success.data)
+        assertEquals(mockMoviesPage, success.data)
         //assertion of calling
-        coVerify(exactly = 1) { repo.getMovies(1) }
+        coVerify(exactly = 1) { repo.search(params.query, params.page) }
     }
 
     @Test
-    fun `emits Error when repository fails`() = runTest {
-        val errorMessage = "Network error"
-        coEvery { repo.getMovies(2) } returns flowOf(ResultState.Error(errorMessage))
+    fun `emits Error when repository search fails`() = runTest {
+        val params = SearchMoviesUseCaseParams(query = "matrix", page = 2)
+        val errorMessage = "Server Error"
+        coEvery { repo.search(params.query, params.page) } returns flowOf(ResultState.Error(errorMessage))
 
-        val collector = useCase(2).toList()
+        val collector = useCase(params).first()
 
-        assertTrue(collector.first() is ResultState.Error)
-        val error = collector.first() as ResultState.Error
+        assertTrue(collector is ResultState.Error)
+        val error = collector as ResultState.Error
         assertEquals(errorMessage, error.message)
         //assertion of calling
-        coVerify(exactly = 1) { repo.getMovies(2) }
+        coVerify(exactly = 1) { repo.search(params.query, params.page) }
     }
 
 }
-
-
-
