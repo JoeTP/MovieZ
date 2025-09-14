@@ -39,6 +39,7 @@ fun AppSearchBar(
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
+                tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = stringResource(R.string.search_icon)
             )
         },
@@ -49,6 +50,7 @@ fun AppSearchBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         contentDescription = stringResource(R.string.clear_search)
                     )
                 }
@@ -64,6 +66,10 @@ fun AppSearchBar(
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            disabledIndicatorColor = MaterialTheme.colorScheme.primary,
         )
     )
 }

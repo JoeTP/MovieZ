@@ -9,9 +9,11 @@ import com.example.data.sources.remote.MoviesRemoteDataSource
 import com.example.domain.model.MovieDetails
 import com.example.domain.model.MoviesPage
 import com.example.domain.repository.MoviesRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
@@ -54,7 +56,7 @@ class MoviesRepositoryImpl @Inject constructor(
             (it.genreIds.contains(18) && it.genreIds.contains(10749)) || (it.genreIds.contains(10749) &&
                     it.genreIds.size == 1) || (it.genreIds.contains(18) && it.genreIds.size == 1) || (it.genreIds.contains(
                 9648
-            ) && it.genreIds.contains(10749) && it.genreIds.contains(53) || it.genreIds.isEmpty())
+            ) && it.genreIds.contains(10749) && it.genreIds.contains(53) || it.genreIds.isEmpty() || it.genreIds.contains(10749) && it.genreIds.contains(27))
         }
     }
     //==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>==>
@@ -73,9 +75,7 @@ class MoviesRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-
-                    val movies = body.results
-                    val filteredMovies = uncensoredMoviesFilter(movies)
+                    val filteredMovies = uncensoredMoviesFilter(body.results)
                     val movieEntity = filteredMovies.map { it.toEntity() }
                     if (page == 1) localDataSource.cacheAndUpdateMovies(movieEntity)
                     val movieDomain = movieEntity.map { it.toDomain() }
@@ -100,7 +100,7 @@ class MoviesRepositoryImpl @Inject constructor(
                 emit(ResultState.Error("Unexpected error: ${t.message}", t))
             }
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     override fun search(query: String, page: Int): Flow<ResultState<MoviesPage>> = flow {
         emit(ResultState.Loading)
@@ -109,7 +109,9 @@ class MoviesRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    val movieDomain = body.results.map { it.toDomain() }
+                    val filteredMovies = uncensoredMoviesFilter(body.results)
+
+                    val movieDomain = filteredMovies.map { it.toDomain() }
                     emit(ResultState.Success(MoviesPage(movieDomain, body.totalPages, page)))
                 } else {
                     emit(ResultState.Error("Empty response"))
@@ -124,7 +126,7 @@ class MoviesRepositoryImpl @Inject constructor(
             emit(ResultState.Error("Unexpected error: ${t.message}", t))
         }
 
-    }
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun getMovieById(id: Int): Flow<ResultState<MovieDetails>> = flow {
         emit(ResultState.Loading)
@@ -144,5 +146,5 @@ class MoviesRepositoryImpl @Inject constructor(
         } catch (e: IOException) {
             emit(ResultState.Error("Network error: ${e.message}", e))
         }
-    }
+    }.flowOn(Dispatchers.IO)
 }

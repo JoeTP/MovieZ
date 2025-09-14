@@ -183,9 +183,7 @@ fun MovieList(
             )
 
             if (index == items.lastIndex && !isLoadingNextPage) {
-                LaunchedEffect(Unit) {
-                    onLoadNextPage()
-                }
+                LaunchedEffect(items.size) { onLoadNextPage() }
             }
         }
         if (isLoadingNextPage) {

@@ -21,8 +21,10 @@ private val DarkColorScheme = darkColorScheme(
     )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF208600),
+    primary = Color(0xFF27A800),
     onSurface = Color(0xFF1E1E1E),
+    onSurfaceVariant = Color(0xFFD7D7D7),
+    onBackground = Color(0xFF1E1E1E),
 
 )
 
@@ -30,7 +32,7 @@ private val LightColorScheme = lightColorScheme(
 fun MovieZTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
