@@ -1,6 +1,5 @@
 package com.example.feature_movies_list.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.result_states.ResultState

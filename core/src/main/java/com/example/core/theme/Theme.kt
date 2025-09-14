@@ -17,6 +17,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = Color(0xFFD7D7D7),
     surfaceContainer = Color(0xFF001A07),
     surface = Color(0xFF1E1E1E),
+    background = Color(0xFF1E1E1E)
 
     )
 
@@ -25,8 +26,12 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1E1E1E),
     onSurfaceVariant = Color(0xFFD7D7D7),
     onBackground = Color(0xFF1E1E1E),
+    surfaceContainer = Color(0xFFF6FFF6),
+    background = Color(0xFFECECEC),
 
-)
+
+
+    )
 
 @Composable
 fun MovieZTheme(

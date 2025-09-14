@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -94,7 +95,10 @@ fun MoviesListScreen(
                         contentDescription = stringResource(R.string.search_for_movies),
                     )
                 }
-            })
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            )
+        )
     }) {
         Box(
             Modifier
@@ -143,7 +147,6 @@ fun SuccessState(
         gridState = gridState
     )
 }
-
 
 
 @Composable
