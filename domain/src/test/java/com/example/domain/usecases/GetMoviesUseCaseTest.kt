@@ -63,6 +63,7 @@ class GetMoviesUseCaseTest {
 
         val success = collector as ResultState.Success
         assertEquals(mockMoviePage, success.data)
+        //assertion of calling
         coVerify(exactly = 1) { repo.getMovies(1) }
     }
 
@@ -76,6 +77,7 @@ class GetMoviesUseCaseTest {
         assertTrue(collector.first() is ResultState.Error)
         val error = collector.first() as ResultState.Error
         assertEquals(errorMessage, error.message)
+        //assertion of calling
         coVerify(exactly = 1) { repo.getMovies(2) }
     }
 
