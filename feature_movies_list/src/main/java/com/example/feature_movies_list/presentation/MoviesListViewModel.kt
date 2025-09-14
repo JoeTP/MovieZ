@@ -43,9 +43,20 @@ class MoviesListViewModel @Inject constructor(
         viewModelScope.launch { intents.emit(MovieListContract.Intent.Load) }
     }
 
+    /**
+     * Sends a UI intent to the ViewModel to be processed by [processIntents].
+     *
+     * @param i An instance of [MovieListContract.Intent] describing the user action.
+     */
     fun sendIntent(i: MovieListContract.Intent) = viewModelScope.launch { intents.emit(i) }
 
 
+    /**
+     * Loads the first page of popular movies.
+     *
+     * - Updates [state] with loading, success and error.
+     * - Sets [maxPage] from the response to bound pagination.
+     */
     private fun loadMovies() = viewModelScope.launch {
         getMoviesUseCase(currentPage)
             .onEach { result ->
@@ -84,6 +95,12 @@ class MoviesListViewModel @Inject constructor(
             }.collect()
     }
 
+    /**
+     * Loads the next page of popular movies if not already loading and below [maxPage].
+     *
+     * - Appends the new page to the existing list and updates pagination state.
+     * - Emits a one-off message when a free limit is reached, and on errors (deduped).
+     */
     private fun loadNextPage() {
         if (isLoadingNextPage || currentPage >= maxPage) return
         isLoadingNextPage = true
@@ -144,6 +161,15 @@ class MoviesListViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Central intent processor that routes UI intents to business logic.
+     *
+     * Supported intents:
+     * - [MovieListContract.Intent.Load]: Loads the first page when the list is empty.
+     * - [MovieListContract.Intent.Retry]: Resets and reloads from page 1.
+     * - [MovieListContract.Intent.OpenDetails]: Emits a navigation side effect.
+     * - [MovieListContract.Intent.LoadNextPage]: Triggers pagination.
+     */
     private fun processIntents() = viewModelScope.launch {
         intents.onEach { intent ->
             when (intent) {

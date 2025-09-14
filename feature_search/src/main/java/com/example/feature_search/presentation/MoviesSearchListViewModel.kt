@@ -39,30 +39,39 @@ class MoviesSearchListViewModel @Inject constructor(
     private val searchQuery = MutableStateFlow("")
     private var currentPage = 1
     private var isLoadingNextPage = false
+
+    /**
+     * The maximum number of pages "Free limit from API".
+     */
     private var maxPage = 500
 
     private var lastSnackMsg: String? = null
 
     private val intents = MutableSharedFlow<MoviesSearchListContract.Intent>()
 
-
     init {
         processIntents()
         observeSearch()
     }
 
+    /**
+     * Sends a UI intent to the ViewModel to be handled by [processIntents].
+     * @param intent An instance of [MoviesSearchListContract.Intent] representing a user action.
+     */
+    fun sendIntent(intent: MoviesSearchListContract.Intent) = viewModelScope.launch { intents.emit(intent) }
 
-    fun sendIntent(intent: MoviesSearchListContract.Intent) =
-        viewModelScope.launch { intents.emit(intent) }
-
+    /**
+     * Observes the search query stream and executes the search use case.
+     *
+     * - Debounces user input to avoid spamming the API.
+     * - Uses [flatMapLatest] to cancel in-flight searches when the query changes.
+     * - Updates [state] with loading, success, and error states.
+     */
     private fun observeSearch() = viewModelScope.launch {
         searchQuery
             .debounce(700L)
             .distinctUntilChanged()
             .flatMapLatest { query ->
-                /**
-                 * To cancel prev flows when query changes
-                 * */
                 val params = SearchMoviesUseCaseParams(query, currentPage)
                 searchMoviesUseCase(params)
             }
@@ -98,6 +107,13 @@ class MoviesSearchListViewModel @Inject constructor(
             }.collect()
     }
 
+    /**
+     * Loads the next page of search results if possible.
+     *
+     * - Guarded by [isLoadingNextPage], [currentPage] vs [maxPage], and non-blank query.
+     * - Appends new results to the existing list and updates pagination state.
+     * - Emits a message effect when the free limit is reached or on errors.
+     */
     private fun loadNextPage() {
         if (isLoadingNextPage || currentPage >= maxPage || searchQuery.value.isBlank()) return
         isLoadingNextPage = true
@@ -158,6 +174,14 @@ class MoviesSearchListViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Collects intents emitted by the UI and routes them to the appropriate handler.
+     *
+     * Supported intents:
+     * - [MoviesSearchListContract.Intent.SearchMovies]: Starts a new search flow.
+     * - [MoviesSearchListContract.Intent.OpenDetails]: Emits a navigation effect to details.
+     * - [MoviesSearchListContract.Intent.LoadNextPage]: Triggers pagination.
+     */
     private fun processIntents() = viewModelScope.launch {
         intents.collect { intent ->
             when (intent) {
