@@ -1,7 +1,6 @@
 package com.example.domain.usecases
 
 import com.example.core.result_states.ResultState
-import com.example.domain.model.Movie
 import com.example.domain.model.MoviesPage
 import com.example.domain.repository.MoviesRepository
 import kotlinx.coroutines.flow.Flow

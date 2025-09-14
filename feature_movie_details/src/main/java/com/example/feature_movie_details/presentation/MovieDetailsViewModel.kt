@@ -3,7 +3,6 @@ package com.example.feature_movie_details.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.result_states.ResultState
-import com.example.domain.model.MovieDetails
 import com.example.domain.usecases.GetMovieDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
