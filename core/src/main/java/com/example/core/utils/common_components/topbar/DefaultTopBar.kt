@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.core.utils.common_components.SmartSpacer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,7 +22,11 @@ fun DefaultTopBar(
     title: String,
     navController: NavHostController?,
     titleCentered: Boolean = false,
-    actions: @Composable() (RowScope.() -> Unit) = {},
+    actions: @Composable() (RowScope.() -> Unit) = {
+        if (navController != null) {
+            SmartSpacer(44.dp)
+        }
+    },
 ) {
     TopAppBar(
         title = {
@@ -31,7 +37,7 @@ fun DefaultTopBar(
 //                fontSize = 20.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = if(titleCentered) TextAlign.Center else TextAlign.Start,
+                textAlign = if (titleCentered) TextAlign.Center else TextAlign.Start,
             )
         },
         actions = actions,

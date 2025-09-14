@@ -1,15 +1,5 @@
 package com.example.core.utils.common_components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.unit.dp
-import com.example.core.utils.common_components.movie.MovieCard
-import com.example.core.utils.common_components.views.LoadingView
 //
 //@Composable
 //fun MovieList(

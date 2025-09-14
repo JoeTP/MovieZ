@@ -6,23 +6,38 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,13 +59,12 @@ fun MoviesListRoute(
 ) {
 
     val state by vm.state.collectAsStateWithLifecycle()
-    val ctx = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         vm.effects.collect { effect ->
             when (effect) {
-                is MovieListContract.Effect.ShowMessage ->
-                    Toast.makeText(ctx, effect.msg, Toast.LENGTH_SHORT).show()
+                is MovieListContract.Effect.ShowMessage -> snackbarHostState.showSnackbar(effect.msg)
 
                 is MovieListContract.Effect.NavigateToDetails ->
                     onMovieClick(effect.id)
@@ -63,6 +77,7 @@ fun MoviesListRoute(
 
     MoviesListScreen(
         state = state,
+        snackbarHostState = snackbarHostState,
         onRetry = { vm.sendIntent(MovieListContract.Intent.Retry) },
         onMovieClick = { id -> onMovieClick(id) },
         onSearchClick = onSearchClick,
@@ -76,24 +91,47 @@ fun MoviesListRoute(
 @Composable
 fun MoviesListScreen(
     state: MovieListContract.State,
+    snackbarHostState: SnackbarHostState,
     onRetry: () -> Unit,
     onLoadNextPage: () -> Unit,
     onMovieClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
 ) {
 
+
     Scaffold(topBar = {
         TopAppBar(
             title = { Text(stringResource(R.string.popular_movies)) },
             actions = {
+                if (state.isLoading) CircularProgressIndicator(
+                    color = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                ) else {
+                    IconButton(onClick = onRetry) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            contentDescription = stringResource(
+                                R.string.refresh
+                            )
+                        )
+                    }
+                }
                 IconButton(onClick = onSearchClick) {
                     Icon(
                         Icons.Default.Search,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         contentDescription = stringResource(R.string.search_for_movies),
                     )
                 }
-            })
-    }) {
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+            )
+        )
+    },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }) {
         Box(
             Modifier
                 .padding(it)
@@ -141,7 +179,6 @@ fun SuccessState(
         gridState = gridState
     )
 }
-
 
 
 @Composable

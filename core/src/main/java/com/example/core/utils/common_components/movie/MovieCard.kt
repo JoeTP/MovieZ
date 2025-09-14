@@ -38,6 +38,8 @@ fun MovieCard(
     val titleColor = MaterialTheme.colorScheme.onSurface
     val borderColor = MaterialTheme.colorScheme.primary
     val shapeOuter = RoundedCornerShape((16 * 1.3).dp)
+//    val releaseYearIntCondition = releaseYear?.isDigitsOnly() == true && releaseYear.toInt() == 2025
+
     Column(
         modifier = modifier
             .shadow(elevation = 6.dp, spotColor = borderColor, shape = shapeOuter, clip = false)
@@ -55,7 +57,7 @@ fun MovieCard(
                 NetworkImage(
                     Modifier
                         .height(260.dp),
-                    posterUrl
+                    posterUrl,
                 )
                 Text(
                     modifier = Modifier
@@ -65,6 +67,7 @@ fun MovieCard(
                     text = releaseYear ?: "Unknown",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
