@@ -27,11 +27,11 @@ fun AppNavSetup(
                 navController.navigate(AppRouts.MovieDetails(id))
             }, onSearchClick = {
                 navController.navigate(AppRouts.MovieListSearch)
-            })
+            }, snackbarHostState = snackbarHostState)
         }
 
         composable<AppRouts.MovieListSearch> {
-            MoviesSearchRoute(navController) { id ->
+            MoviesSearchRoute(navController, snackbarHostState = snackbarHostState) { id ->
                 navController.navigate(AppRouts.MovieDetails(id))
             }
         }

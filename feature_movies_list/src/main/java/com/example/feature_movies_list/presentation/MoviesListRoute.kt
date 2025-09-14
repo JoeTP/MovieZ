@@ -21,12 +21,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,16 +55,15 @@ fun MoviesListRoute(
     vm: MoviesListViewModel = hiltViewModel(),
     onMovieClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
 
     val state by vm.state.collectAsStateWithLifecycle()
-    val ctx = LocalContext.current
 
     LaunchedEffect(Unit) {
         vm.effects.collect { effect ->
             when (effect) {
-                is MovieListContract.Effect.ShowMessage ->
-                    Toast.makeText(ctx, effect.msg, Toast.LENGTH_SHORT).show()
+                is MovieListContract.Effect.ShowMessage -> snackbarHostState.showSnackbar(effect.msg)
 
                 is MovieListContract.Effect.NavigateToDetails ->
                     onMovieClick(effect.id)

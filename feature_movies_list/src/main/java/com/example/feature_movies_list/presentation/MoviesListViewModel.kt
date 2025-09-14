@@ -1,8 +1,10 @@
 package com.example.feature_movies_list.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.result_states.ResultState
+import com.example.core.result_states.userMessage
 import com.example.domain.usecases.GetMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,6 +36,7 @@ class MoviesListViewModel @Inject constructor(
     private var currentPage = 1
     private var isLoadingNextPage = false
     private var maxPage = 500
+    private var lastSnackMsg: String? = null
 
     init {
         processIntents()
@@ -75,7 +78,7 @@ class MoviesListViewModel @Inject constructor(
                 }
             }
             .catch { e ->
-                val msg = e.message ?: "Unexpected error"
+                val msg = e.userMessage()
                 _state.update { it.copy(isLoading = false, error = msg) }
                 _effects.emit(MovieListContract.Effect.ShowMessage(msg))
             }.collect()
@@ -119,7 +122,11 @@ class MoviesListViewModel @Inject constructor(
                                 isLoadingNextPage = false
                             )
                         }
-                        _effects.emit(MovieListContract.Effect.ShowMessage(result.message))
+                        val msg = result.message
+                        if (msg != lastSnackMsg) {
+                            lastSnackMsg = msg
+                            _effects.emit(MovieListContract.Effect.ShowMessage(msg))
+                        }
                         isLoadingNextPage = false
                     }
                 }
@@ -132,7 +139,6 @@ class MoviesListViewModel @Inject constructor(
                         isLoadingNextPage = false
                     )
                 }
-                _effects.emit(MovieListContract.Effect.ShowMessage(msg))
                 isLoadingNextPage = false
             }.collect()
         }
