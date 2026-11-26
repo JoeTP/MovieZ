@@ -19,6 +19,8 @@ abstract class DataModule {
     @Singleton
     abstract fun bindRemote(impl: MoviesRemoteDataSourceImpl): MoviesRemoteDataSource
 
+
+
     @Binds
     @Singleton
     abstract fun bindLocal(impl: MoviesLocalDataSourceImpl): MoviesLocalDataSource
